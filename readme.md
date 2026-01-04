@@ -8,7 +8,6 @@
 ###
 #### I originally developed Android Speech Multiplatform Bridge in Summer 2025 (two weeks) to use Android speech recognition within
 #### JavaFX/Gluon.It became my first Android‑specific project.
-#### As of Dec. 30, 2025, it has reached approx. 2 weeks of progress (1.commit).
 
 #### External dependencies: nanohttpd-2.3.1.jar (because my own http-server https://github.com/Marco-Scherzer/MSimpleServer is not yet completely debugged on android. This might change in the future)
 #### Development of MSimpleAndroidSpeechMultiPlatformBridge started in Summer 2025 (two weeks)  and had reached approx. 2 weeks of progress when it started to work for my own simple scenario purposes.
