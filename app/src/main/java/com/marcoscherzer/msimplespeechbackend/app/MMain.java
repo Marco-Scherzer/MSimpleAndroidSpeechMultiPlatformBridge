@@ -36,6 +36,10 @@ public final class MMain extends AppCompatActivity {
     protected final void onCreate(Bundle savedInstanceState) {
        try {
            super.onCreate(savedInstanceState);
+
+
+           if (getSupportActionBar() != null) getSupportActionBar().hide();
+
            gui = new MMiniGui(this);
            setContentView(gui.getLayout());
            clientCreator = new MSimpleSpeechClientCreator(gui.getClientPanel()) {

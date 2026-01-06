@@ -1,5 +1,7 @@
 package com.marcoscherzer.msimplespeechbackend.server;
 
+import static android.os.Looper.getMainLooper;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -28,23 +30,28 @@ public final class MSpeechRecognizer {
 
     private final Runnable recognizerRunnable;
 
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private Runnable timeoutRunnable;
+
+    private static final long MAX_RECORDING_MS = 15000L;//timeout
+
     /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public MSpeechRecognizer(Context context) {
         recognizer = SpeechRecognizer.createSpeechRecognizer(context);
 
         recognizer.setRecognitionListener(new RecognitionListener() {
             /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+             * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+             */
             @Override
             public final void onReadyForSpeech(Bundle params) { //onReadyForSpeech – der Dienst ist bereit, Audio anzunehmen.
                 System.out.println("SpeechRecognizer.onReadyForSpeech(params=" + params + ")|");
             }
             /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+             * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+             */
             @Override
             public final void onBeginningOfSpeech() { //onBeginningOfSpeech – tatsächlich kommen Sprachdaten an.
                 System.out.println("SpeechRecognizer.onBeginningOfSpeech|");
@@ -57,32 +64,35 @@ public final class MSpeechRecognizer {
                 }
             }
             /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+             * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+             */
             @Override
             public final void onRmsChanged(float rmsdB) {
                 //System.out.println("SpeechRecognizer.onRmsChanged| (rmsdB=" + rmsdB + ")|");
             }
             /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+             * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+             */
             @Override
             public final void onBufferReceived(byte[] buffer) {
                 System.out.println("SpeechRecognizer.onBufferReceived| (buffer=" + buffer + ")|");
             }
             /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+             * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+             */
             @Override
             public final void onEndOfSpeech() { //onEndOfSpeech – die Aufnahme stoppt, der Dienst hat keine weiteren Audio-Frames mehr.
                 System.out.println("SpeechRecognizer.onEndOfSpeech|");
             }
             /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+             * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+             */
             @Override
             public final void onError(int error) { //nach interner Verarbeitung/Analyse des Audiostreams
                 System.out.println("SpeechRecognizer.onError(error=" + error + ")|");
+                // Timeout entfernen, falls noch aktiv
+                mainHandler.removeCallbacks(timeoutRunnable);
+
                 lock.lock();
                 try {
                     speechRecognizerIsRunning = false;
@@ -92,14 +102,16 @@ public final class MSpeechRecognizer {
                 }
             }
             /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+             * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+             */
             @Override
             public final void onResults(Bundle results) {  //nach interner Verarbeitung/Analyse des Audiostreams
                 System.out.println("SpeechRecognizer.onResults(results=" + results + ")|");
 
-                ArrayList<String> matches =
-                        results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                // Timeout entfernen, falls noch aktiv
+                mainHandler.removeCallbacks(timeoutRunnable);
+
+                ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                 if (matches != null) {
                     for (String result : matches) {
                         resultText.append(result).append("\n");
@@ -118,62 +130,79 @@ public final class MSpeechRecognizer {
 
             private String lastPartial = "";
             /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+             * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+             */
             @Override
             public final void onPartialResults(Bundle partialResults) {
-                ArrayList<String> partial =
-                        partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+                /*ArrayList<String> partial = partialResults.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                 if (partial != null && !partial.isEmpty()) {
                     String current = partial.get(0);
                     if (!current.equals(lastPartial)) {
-                        // optional: resultText.append(current).append("\n");
+                        //resultText.append(current).append("\n");
                         lastPartial = current;
                     }
-                }
+                }*/
             }
             /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+             * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+             */
             @Override
             public final void onEvent(int eventType, Bundle params) {
                 System.out.println("SpeechRecognizer.onResults(eventType=" + eventType + ", params="+params+")|");
             }
         });
         /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+         * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         */
         recognizerRunnable = () -> {
             System.out.println("MSpeechRecognizer.recognizerRunnable| Runnable running");
-            resultText.setLength(0); // Reset
+            resultText.setLength(0);
 
             Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
             intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "de-DE");
-            intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
+            intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
             intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false);
-            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 5000);
             intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 3000);
-            intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 2000);
-            intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, "com.marcoscherzer.msimplespeechbackend");
-
             recognizer.startListening(intent);
+
+            // Fallback: erzwinge Stop nach MAX_RECORDING_MS
+            timeoutRunnable = () -> {
+                System.out.println("MSpeechRecognizer.timeoutRunnable| forcing stopListening/cancel after timeout");
+                try {
+                    recognizer.stopListening();
+                } catch (Exception e) {
+                    try { recognizer.cancel(); } catch (Exception ex) {  }
+                }
+                lock.lock();
+                try {
+                    speechRecognizerIsRunning = false;
+                    stateChanged.signalAll();
+                } finally {
+                    lock.unlock();
+                }
+            };
+            mainHandler.postDelayed(timeoutRunnable, MAX_RECORDING_MS);
         };
-
-
 
     }
     /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public final void startListening() {
-        new Handler(Looper.getMainLooper()).post(recognizerRunnable);
+        lock.lock();
+        try {
+            speechRecognizerIsRunning = true;
+            stateChanged.signalAll();
+        } finally { lock.unlock(); }
+
+        new Handler(getMainLooper()).post(recognizerRunnable);
 
         System.out.println("MSpeechRecognizer.startListening| Runnable submitted");
     }
     /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public final String waitOnResults() {
         System.out.println("MSpeechRecognizer.waitOnResults| waiting on speechRecognizerIsRunning=true");
         lock.lock();
@@ -198,12 +227,15 @@ public final class MSpeechRecognizer {
         return resultText.toString();
     }
     /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public final void destroy() {
+        // Timeout entfernen
+        mainHandler.removeCallbacks(timeoutRunnable);
         recognizer.destroy();
     }
 }
+
 
 
 
