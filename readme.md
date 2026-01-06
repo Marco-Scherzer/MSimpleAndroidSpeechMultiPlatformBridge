@@ -1,20 +1,16 @@
-# MSimpleAndroidSpeechMultiPlatformBridge
-#### My simple Android Speech Multiplatform Bridge 
+# Speech Recognition Multiplatform Bridge for Android (formerly MSimpleAndroidSpeechMultiPlatformBridge)
 #### (A speech recognition server running on Android plus platform independent java client-code)
-#### This software (Android Speech Multiplatform Bridge and my own custom pairing protocol) is proprietary and protected by copyright law.
+#### This software (Speech Recognition Multiplatform Bridge for Android and my own custom pairing protocol) is proprietary and protected by copyright law.
 #### Idea, Author, and Copyright: Marco Scherzer
 #### All rights reserved. This repository is to be treated as private.
 ###
 ### ( Android™ is a trademark of Google LLC. )
 ###
 #### External dependencies: nanohttpd-2.3.1.jar (because my own http-server https://github.com/Marco-Scherzer/MSimpleServer is not yet completely debugged on android. This might change in the future)
-#### I originally developed Android Speech Multiplatform Bridge to use Android speech recognition within JavaFX/Gluon. It became my first Android‑specific project.
-#### Development of MSimpleAndroidSpeechMultiPlatformBridge started in Summer 2025 (two weeks)  and had reached approx. 2 weeks of progress when it started to work for my own simple scenario purposes.
+#### I originally developed Speech Recognition Multiplatform Bridge to use Android speech recognition within JavaFX/Gluon. It became my first Android‑specific project.
+#### Development of "Speech Recognition Multiplatform Bridge for Android" started in Summer 2025 (two weeks) and had reached approx. 2 weeks of progress when it started to work for my own simple scenario purposes.
 #### Features after 2 weeks:
 
-# MSimpleAndroidSpeechMultiPlatformBridge
-
-## Features
 - **Enables client devices running on non‑Android systems to use the Android Speech Recognition that runs on an Android device**  
   Allows only a secure 1:1 connection between client device and Android device.
 
@@ -33,7 +29,7 @@
 
 ---
 
-## Protocol Definition
+## Protocol Definition (my own custom network device pairing protocol)
 
 ### Handshake
 - **Step 0:** The user has to start the pairing handshake process on the server (e.g., by pressing a button)
@@ -59,7 +55,7 @@ Once a client was connected for the first time, the server blocks any other (unk
 
 
 
-#### Since Dec. 30, 2025, I decided to develop MSimpleAndroidSpeechMultiPlatformBridge on GitHub, continuing from this point.
+#### Since Dec. 30, 2025, I decided to develop Speech Recognition Multiplatform Bridge for Android on GitHub, continuing from this point.
 #### Note: Because I use Git as an addition to my history for proof of authorship, I regularly commit things in my (anyway *to treat as private*) repositories in an unready state (nothing works).
 
 
