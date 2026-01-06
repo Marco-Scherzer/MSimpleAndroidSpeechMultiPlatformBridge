@@ -19,8 +19,7 @@
 - **   3. Once a client was connected for the first time, the server blocks any other(unkown) client that has another ID.
 - **   4. One way endpoints make it impossible to reuse the current prepared endpoint. 
 - **      If an unauthenticated client steals the ID and uses the endpoint the authenticated client can not use the endpoint anymore.
-- **      (this shows unauthenticated use) and the server has to be restarted/reconnected (forces the user to prevent unauthenticated use).
-- - **my pairing protocol  https pairing protocol: this
+- **      (this shows unauthenticated use) and the server has to be restarted/reconnected (and so forces the user to prevent unauthenticated use).
 - **Platform Independent Java Client Code**
 - **Server plus Client Surface for testing**
 
