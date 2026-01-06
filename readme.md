@@ -12,7 +12,8 @@
 #### Features after 2 weeks:
 
 - **Enables client devices running on non‑Android systems to use the Android Speech Recognition that runs on an Android device**  
-  Allows only a secure 1:1 connection between client device and Android device.
+
+- **Secure pairing: Allows only secure 1:1 paired communication between a client device and the Android device**
 
 - **Platform‑independent Java client code**
 
