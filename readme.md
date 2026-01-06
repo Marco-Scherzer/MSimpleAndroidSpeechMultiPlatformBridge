@@ -18,21 +18,22 @@
   Allows only secure 1:1 connections between device and Android device.
 
   **Handshake:**
+  - Step 0: The user has to start the pairing handshake process on the server (e.g., by pressing a button)
   - Step 1: The client registers with ID at the server.
   - Step 2: The server answers with a one‑way endpoint for the next request.
 
-    **Feature A:**  
-    Once a client was connected for the first time, the server blocks any other (unknown) client that has another ID.
+   **Feature A:**  
+   Once a client was connected for the first time, the server blocks any other (unknown) client that has another ID.
 
   **Content transmission:**
   - Step 1: The client requests the next content by using this one‑way endpoint.
   - Step 2: The server sends the content plus the next one‑way endpoint … and so on (1,2, 1,2, …)
 
-    **Feature B:**  
-    One‑way endpoints make it impossible to reuse the current prepared endpoint.  
-    If an unauthenticated client steals the ID and uses the current endpoint, the authenticated client cannot use the endpoint anymore.  
-    This indicates unauthenticated use (and can optionally trigger an alarm).
-    Furthermore, establishing a new connection requires restarting or reconnecting the server — which forces the user to prevent the unauthorized access.
+   **Feature B:**  
+   One‑way endpoints make it impossible to reuse the current prepared endpoint.  
+   If an unauthenticated client steals the ID and uses the current endpoint, the authenticated client cannot use the endpoint anymore.  
+   This indicates unauthenticated use (and can optionally trigger an alarm).
+   Furthermore, establishing a new connection then requires restarting the pairing (handshake) process on the server (e.g., by pressing a button) — which forces the user to prevent unauthorized access.
 
 - **Platform‑independent Java client code**
 
