@@ -1,29 +1,43 @@
 # MSimpleAndroidSpeechMultiPlatformBridge
-#### My simple Android Speech Multiplatform Bridge.
+#### My simple Android Speech Multiplatform Bridge 
+#### (A speech recognition server running on Android plus platform independent java client-code)
 #### This software is proprietary and protected by copyright law.
 #### Idea, Author, and Copyright: Marco Scherzer
 #### All rights reserved. This repository is to be treated as private.
 ###
 ### ( Android™ is a trademark of Google LLC. )
 ###
-#### I originally developed Android Speech Multiplatform Bridge in Summer 2025 (two weeks) to use Android speech recognition within
-#### JavaFX/Gluon.It became my first Android‑specific project.
-
 #### External dependencies: nanohttpd-2.3.1.jar (because my own http-server https://github.com/Marco-Scherzer/MSimpleServer is not yet completely debugged on android. This might change in the future)
+#### I originally developed Android Speech Multiplatform Bridge to use Android speech recognition within JavaFX/Gluon. It became my first Android‑specific project.
 #### Development of MSimpleAndroidSpeechMultiPlatformBridge started in Summer 2025 (two weeks)  and had reached approx. 2 weeks of progress when it started to work for my own simple scenario purposes.
 #### Features after 2 weeks:
-- **Speech Recognition Server for Android: Enables Client Devices running on non Android Systems to use the Android Speech Recognition**
-- **Works with my own special https pairing protocol: Allows only 1:1 connections between device and Android-Device**
-- **   Handshake: Step 1. The client registers with ID at the server.
-- **   Handshake: Step 2. The server answers with a one way endpoint for the next request.
-- **   Feature A. Once a client was connected for the first time, the server blocks any other(unkown) client that has another ID.
-- **   Content transmition: Step 1. The client requests the next content by using this oneway-endpoint
-- **   Content transmition: Step 2. The server sends the content plus the the next oneway-endpoint ... an so on (1,2, 1,2,..)
-- **   Feature B. One way endpoints make it impossible to reuse the current prepared endpoint. 
-- **      If an unauthenticated client steals the ID and uses the current endpoint the authenticated client can not use the endpoint anymore.
-- **      (this shows unauthenticated use) and the server has to be restarted/reconnected (and so forces the user to prevent unauthenticated use).
-- **Platform Independent Java Client Code**
-- **Server plus Client Surface for testing**
+
+- **Enables client devices running on non‑Android systems to use the Android Speech Recognition that runs on an Android device**
+
+- **Works with my own custom HTTPS pairing protocol (MSimpleAndroidSpeechMultiPlatformBridge is the example implementation of it):**  
+  Allows only secure 1:1 connections between device and Android device.
+
+  **Handshake:**
+  - Step 1: The client registers with ID at the server.
+  - Step 2: The server answers with a one‑way endpoint for the next request.
+
+    **Feature A:**  
+    Once a client was connected for the first time, the server blocks any other (unknown) client that has another ID.
+
+  **Content transmission:**
+  - Step 1: The client requests the next content by using this one‑way endpoint.
+  - Step 2: The server sends the content plus the next one‑way endpoint … and so on (1,2, 1,2, …)
+
+    **Feature B:**  
+    One‑way endpoints make it impossible to reuse the current prepared endpoint.  
+    If an unauthenticated client steals the ID and uses the current endpoint, the authenticated client cannot use the endpoint anymore.  
+    This indicates unauthenticated use (and can optionally trigger an alarm).
+    Furthermore, establishing a new connection requires restarting or reconnecting the server — which forces the user to prevent the unauthorized access.
+
+- **Platform‑independent Java client code**
+
+- **Test GUI: Server plus client for testing**
+
 
 #### Since Dec. 30, 2025, I decided to develop MSimpleAndroidSpeechMultiPlatformBridge on GitHub, continuing from this point.
 #### Note: Because I use Git as an addition to my history for proof of authorship, I regularly commit things in my (anyway *to treat as private*) repositories in an unready state (nothing works).
