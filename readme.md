@@ -13,12 +13,14 @@
 #### Development of MSimpleAndroidSpeechMultiPlatformBridge started in Summer 2025 (two weeks)  and had reached approx. 2 weeks of progress when it started to work for my own simple scenario purposes.
 #### Features after 2 weeks:
 - **Speech Recognition Server for Android: Enables Client Devices running on non Android Systems to use the Android Speech Recognition**
-- **My own special https pairing protocol: Allows only 1:1 connections between device and Android-Device**
-- **   1. The client registers with ID at the server.
-- **   2. The server sends a one way endpoint for the next request.
-- **   3. Once a client was connected for the first time, the server blocks any other(unkown) client that has another ID.
-- **   4. One way endpoints make it impossible to reuse the current prepared endpoint. 
-- **      If an unauthenticated client steals the ID and uses the endpoint the authenticated client can not use the endpoint anymore.
+- **Works with my own special https pairing protocol: Allows only 1:1 connections between device and Android-Device**
+- **   Handshake: Step 1. The client registers with ID at the server.
+- **   Handshake: Step 2. The server answers with a one way endpoint for the next request.
+- **   Feature A. Once a client was connected for the first time, the server blocks any other(unkown) client that has another ID.
+- **   Content transmition: Step 1. The client requests the next content by using this oneway-endpoint
+- **   Content transmition: Step 2. The server sends the content plus the the next oneway-endpoint ... an so on (1,2, 1,2,..)
+- **   Feature B. One way endpoints make it impossible to reuse the current prepared endpoint. 
+- **      If an unauthenticated client steals the ID and uses the current endpoint the authenticated client can not use the endpoint anymore.
 - **      (this shows unauthenticated use) and the server has to be restarted/reconnected (and so forces the user to prevent unauthenticated use).
 - **Platform Independent Java Client Code**
 - **Server plus Client Surface for testing**
