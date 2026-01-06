@@ -1,7 +1,7 @@
 # MSimpleAndroidSpeechMultiPlatformBridge
 #### My simple Android Speech Multiplatform Bridge 
 #### (A speech recognition server running on Android plus platform independent java client-code)
-#### This software is proprietary and protected by copyright law.
+#### This software (Android Speech Multiplatform Bridge and my own custom HTTPS pairing protocol) is proprietary and protected by copyright law.
 #### Idea, Author, and Copyright: Marco Scherzer
 #### All rights reserved. This repository is to be treated as private.
 ###
