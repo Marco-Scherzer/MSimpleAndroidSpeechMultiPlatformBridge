@@ -1,5 +1,6 @@
 package com.marcoscherzer.msimplespeechbackend.server;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.speech.RecognizerIntent;
 
@@ -11,7 +12,7 @@ import java.util.concurrent.CountDownLatch;
  * erster entwurf   temporär zu kompatiblität der public api von MSpeechRecognizer
  * Startet den Google-Sprachdialog (modal, stabil, zukunftssicher?!)
  */
-public final class MIntentBasedSpeechRecognitionManager {
+public final class MIntentBasedSpeechRecognitionManager extends MISpeechRecognitionManager{
 
     private static final int REQ_CODE_SPEECH_INPUT = 1001;
 
@@ -19,10 +20,14 @@ public final class MIntentBasedSpeechRecognitionManager {
     private String resultText = "";
     private CountDownLatch latch;
 
-    public MIntentBasedSpeechRecognitionManager(Activity activity) {
-        this.activity = activity;
+    public MIntentBasedSpeechRecognitionManager(Context context) {
+        if (!(context instanceof Activity)) {
+            throw new IllegalArgumentException("Context must be an Activity");
+        }
+        this.activity = (Activity) context;
     }
-/**
+
+    /**
  *@version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
   * erster entwurf  temporär zur kompatiblität der public api von MSpeechRecognizer
  * Startet den Google-Sprachdialog (modal, stabil, zukunftssicher)

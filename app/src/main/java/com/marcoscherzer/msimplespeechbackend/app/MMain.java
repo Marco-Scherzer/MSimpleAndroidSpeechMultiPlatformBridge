@@ -1,6 +1,7 @@
 package com.marcoscherzer.msimplespeechbackend.app;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,6 +9,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.marcoscherzer.msimplespeechbackend.R;
 import com.marcoscherzer.msimplespeechbackend.client.MSimpleSpeechClientCreator;
+import com.marcoscherzer.msimplespeechbackend.server.MISpeechRecognitionManager;
 import com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechBackendServer;
 import com.marcoscherzer.msimplespeechbackend.client.MSimpleSpeechClient;
 import com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechServerCreator;
@@ -24,10 +26,12 @@ public final class MMain extends AppCompatActivity {
     private MSimpleSpeechBackendServer server;
     private MSimpleSpeechClient client;
     private MMiniGui gui;
-
+    private MISpeechRecognitionManager speechRecognitionManager;
     MSimpleSpeechClientCreator clientCreator;
     MSimpleSpeechServerCreator serverCreator;
     private Certificate ca;
+
+
 
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -56,7 +60,7 @@ public final class MMain extends AppCompatActivity {
            }
 
            gui.getServerPanel().getResetButton().setOnClickListener(v -> {
-               server = serverCreator.createServer();
+               server = serverCreator.createServer( speechRecognitionManager );
            });
 
            gui.getClientPanel().getRecordButton().setEnabled(false);
@@ -80,6 +84,12 @@ public final class MMain extends AppCompatActivity {
        }
     }
 
+    /*
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        speechRecognitionManager.onActivityResult(requestCode, resultCode, data);
+    }
+*/
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */

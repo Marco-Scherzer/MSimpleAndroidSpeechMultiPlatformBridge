@@ -18,7 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MSpeechRecognitionManager {
+public final class MSpeechRecognitionManager extends MISpeechRecognitionManager{
 
     private final SpeechRecognizer recognizer;
     private final StringBuilder resultText = new StringBuilder();
@@ -225,6 +225,10 @@ public final class MSpeechRecognitionManager {
         }
         return resultText.toString();
     }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) { }
+
     /**
      * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */

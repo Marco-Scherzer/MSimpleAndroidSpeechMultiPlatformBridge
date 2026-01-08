@@ -22,7 +22,8 @@ import java.util.UUID;
 public final class MSimpleSpeechBackendServer {
 
     private final NanoHTTPD server;
-    private final MSpeechRecognitionManager recognizer;
+    private final MISpeechRecognitionManager recognizer;
+
     private String registeredClientId = null;
     private String nextRecordEndpoint = "/initialize";
     private Runnable onPairHandler;
@@ -31,10 +32,10 @@ public final class MSimpleSpeechBackendServer {
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-    public MSimpleSpeechBackendServer(int port, Context context,PrintStream out) throws Exception {
+    public MSimpleSpeechBackendServer(int port, MISpeechRecognitionManager recognitionManager, Context context, PrintStream out) throws Exception {
+        this.recognizer= recognitionManager;
         this.out=out;
         out.println("Initializing server...");
-        recognizer = new MSpeechRecognitionManager(context);
         SSLContext sslContext= createSSLContext(context);
         server = new NanoHTTPD(port) {
             /**
@@ -141,6 +142,8 @@ public final class MSimpleSpeechBackendServer {
     public void setOnPair(Runnable handler) {
         this.onPairHandler = handler;
     }
+
+
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
