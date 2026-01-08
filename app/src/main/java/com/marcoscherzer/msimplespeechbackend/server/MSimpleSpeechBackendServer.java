@@ -54,7 +54,7 @@ public final class MSimpleSpeechBackendServer {
                     out.println("Rate limited.");
                     return NanoHTTPD.newFixedLengthResponse(Status.TOO_MANY_REQUESTS, "text/plain", "Slow down");
                 }
-
+//-----------------------------------------------------
                 String clientId = session.getHeaders().get("x-client-id");
                 if (clientId == null || clientId.isEmpty()) {
                     out.println("Missing client ID.");
