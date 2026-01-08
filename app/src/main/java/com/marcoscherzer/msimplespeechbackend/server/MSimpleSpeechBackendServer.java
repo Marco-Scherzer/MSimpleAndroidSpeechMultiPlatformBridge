@@ -3,11 +3,10 @@ package com.marcoscherzer.msimplespeechbackend.server;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.security.KeyStore;
-import android.app.Activity;
+
 import android.content.Context;
 
 import com.marcoscherzer.msimplespeechbackend.R;
-import com.marcoscherzer.msimplespeechbackend.util.gui.MSimpleConsole2TextAreaRedirector;
 
 import fi.iki.elonen.NanoHTTPD;
 import fi.iki.elonen.NanoHTTPD.Response.Status;
@@ -23,7 +22,7 @@ import java.util.UUID;
 public final class MSimpleSpeechBackendServer {
 
     private final NanoHTTPD server;
-    private final MSpeechRecognizer recognizer;
+    private final MSpeechRecognitionManager recognizer;
     private String registeredClientId = null;
     private String nextRecordEndpoint = "/initialize";
     private Runnable onPairHandler;
@@ -35,7 +34,7 @@ public final class MSimpleSpeechBackendServer {
     public MSimpleSpeechBackendServer(int port, Context context,PrintStream out) throws Exception {
         this.out=out;
         out.println("Initializing server...");
-        recognizer = new MSpeechRecognizer(context);
+        recognizer = new MSpeechRecognitionManager(context);
         SSLContext sslContext= createSSLContext(context);
         server = new NanoHTTPD(port) {
             /**

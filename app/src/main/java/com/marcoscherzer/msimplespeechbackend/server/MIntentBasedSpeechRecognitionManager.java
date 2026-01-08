@@ -11,7 +11,7 @@ import java.util.concurrent.CountDownLatch;
  * erster entwurf   temporär zu kompatiblität der public api von MSpeechRecognizer
  * Startet den Google-Sprachdialog (modal, stabil, zukunftssicher?!)
  */
-public final class MIntentSpeechRecognizer {
+public final class MIntentBasedSpeechRecognitionManager {
 
     private static final int REQ_CODE_SPEECH_INPUT = 1001;
 
@@ -19,7 +19,7 @@ public final class MIntentSpeechRecognizer {
     private String resultText = "";
     private CountDownLatch latch;
 
-    public MIntentSpeechRecognizer(Activity activity) {
+    public MIntentBasedSpeechRecognitionManager(Activity activity) {
         this.activity = activity;
     }
 /**

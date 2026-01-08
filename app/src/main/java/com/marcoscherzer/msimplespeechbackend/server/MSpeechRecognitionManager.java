@@ -2,7 +2,6 @@ package com.marcoscherzer.msimplespeechbackend.server;
 
 import static android.os.Looper.getMainLooper;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -19,7 +18,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MSpeechRecognizer {
+public final class MSpeechRecognitionManager {
 
     private final SpeechRecognizer recognizer;
     private final StringBuilder resultText = new StringBuilder();
@@ -38,7 +37,7 @@ public final class MSpeechRecognizer {
     /**
      * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSpeechRecognizer(Context context) {
+    public MSpeechRecognitionManager(Context context) {
         recognizer = SpeechRecognizer.createSpeechRecognizer(context);
 
         recognizer.setRecognitionListener(new RecognitionListener() {
