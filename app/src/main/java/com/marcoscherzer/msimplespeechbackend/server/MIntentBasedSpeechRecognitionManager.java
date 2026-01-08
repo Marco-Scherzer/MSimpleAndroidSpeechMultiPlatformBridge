@@ -9,8 +9,7 @@ import java.util.concurrent.CountDownLatch;
 
 /**
  *@version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- * erster entwurf   temporär zu kompatiblität der public api von MSpeechRecognizer
- * Startet den Google-Sprachdialog (modal, stabil, zukunftssicher?!)
+ * Startet den Google-Sprachdialog
  */
 public final class MIntentBasedSpeechRecognitionManager extends MISpeechRecognitionManager{
 
@@ -29,8 +28,7 @@ public final class MIntentBasedSpeechRecognitionManager extends MISpeechRecognit
 
     /**
  *@version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-  * erster entwurf  temporär zur kompatiblität der public api von MSpeechRecognizer
- * Startet den Google-Sprachdialog (modal, stabil, zukunftssicher)
+ * Startet den Google-Sprachdialog
  */
     public void startListening() {
         latch = new CountDownLatch(1);
@@ -46,7 +44,6 @@ public final class MIntentBasedSpeechRecognitionManager extends MISpeechRecognit
     }
     /**
      *@version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-    erster entwurf
      */
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQ_CODE_SPEECH_INPUT) {
@@ -60,7 +57,6 @@ public final class MIntentBasedSpeechRecognitionManager extends MISpeechRecognit
 
    /**
      *@version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-       erster entwurf  temporär zur kompatiblität der public api von MSpeechRecognizer
      */
     public String waitOnResults() {
         try {

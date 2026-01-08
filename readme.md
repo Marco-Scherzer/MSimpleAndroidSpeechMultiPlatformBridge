@@ -14,6 +14,8 @@
 - **Enables client devices running on non‑Android systems to use the Android Speech Recognition that runs on an Android device**  
 
 - **Secure pairing: Allows only secure 1:1 paired communication between a client device and the Android device**
+- 
+- **2 speech recognition modes choosable for server-side: implementation 1 uses Android's SpeechRecognizer, implementation 2 uses a RecognizerIntent 
 
 - **Platform‑independent Java client code**
 
