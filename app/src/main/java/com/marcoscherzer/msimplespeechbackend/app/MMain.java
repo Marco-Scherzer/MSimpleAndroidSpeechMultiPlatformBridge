@@ -10,9 +10,12 @@ import androidx.core.content.ContextCompat;
 import com.marcoscherzer.msimplespeechbackend.R;
 import com.marcoscherzer.msimplespeechbackend.client.MSimpleSpeechClientCreator;
 import com.marcoscherzer.msimplespeechbackend.server.MISpeechRecognitionManager;
+import com.marcoscherzer.msimplespeechbackend.server.MIntentBasedSpeechRecognitionManager;
 import com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechBackendServer;
 import com.marcoscherzer.msimplespeechbackend.client.MSimpleSpeechClient;
 import com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechServerCreator;
+import com.marcoscherzer.msimplespeechbackend.server.MSpeechRecognitionManager;
+
 import java.io.InputStream;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
@@ -59,6 +62,8 @@ public final class MMain extends AppCompatActivity {
                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO);
            }
 
+           //speechRecognitionManager = new MSpeechRecognitionManager(this);
+           speechRecognitionManager = new MIntentBasedSpeechRecognitionManager(this);
            gui.getServerPanel().getResetButton().setOnClickListener(v -> {
                server = serverCreator.createServer( speechRecognitionManager );
            });
@@ -84,12 +89,12 @@ public final class MMain extends AppCompatActivity {
        }
     }
 
-    /*
+
     @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         speechRecognitionManager.onActivityResult(requestCode, resultCode, data);
     }
-*/
+
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
