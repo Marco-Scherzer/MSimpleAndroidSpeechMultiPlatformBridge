@@ -38,8 +38,7 @@ public final class MIntentBasedSpeechRecognitionManager extends MISpeechRecognit
                 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "de-DE");
         intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Bitte sprechen…");
-        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
-
+        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
         activity.startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
     }
     /**
