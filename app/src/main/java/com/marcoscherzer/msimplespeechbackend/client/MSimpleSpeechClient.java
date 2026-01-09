@@ -37,16 +37,20 @@ public final class MSimpleSpeechClient {
     private MRunnable1P<String> onFirstConnectionFailureHandler;
     private Runnable onFirstConnectionJobStartHandler;
 
-    private State state = State.recordingJobFinished;
+    private State state = null;//State.recordingJobFinished;
     private String recordEndpoint;
 
     public PrintStream out;
 
+    /**
+     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public static enum State {
-        recordingJobStarted,
-        recordingJobFinished,
         firstConnectionJobStarted,
-        firstConnectionJobFinished
+        firstConnectionJobFinished,
+        recordingJobStarted,
+        recordingJobFinished
+
     }
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -55,10 +59,21 @@ public final class MSimpleSpeechClient {
         return this.state;
     }
 
-    // === Setter für Record-Job-Handler ===
+    /**
+     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final boolean isReady() {
+        return state == State.firstConnectionJobFinished || state == State.recordingJobFinished;
+    }
+
+    /**
+     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * Setter für Record-Job-Handler
+    */
     public final void setOnRecordResponse(MRunnable1P<String> handler) {
         this.onRecordResponseHandler = handler;
     }
+
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
@@ -71,10 +86,10 @@ public final class MSimpleSpeechClient {
     public final void setOnRecordJobStart(Runnable handler) {
         this.onRecordJobStartHandler = handler;
     }
-    /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
-    // === Setter für FirstConnection-Job-Handler ===
+      /**
+       * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+       * Setter für FirstConnection-Job-Handler
+     */
     public final void setOnFirstConnectionResponse(MRunnable1P<String> handler) {
         this.onFirstConnectionResponseHandler = handler;
     }
@@ -133,15 +148,15 @@ public final class MSimpleSpeechClient {
  */
     private final Runnable recordJob = new Runnable() {
         public void run() {
-            state = State.recordingJobStarted;
-            if (onRecordJobStartHandler != null) onRecordJobStartHandler.run();
+                state = State.recordingJobStarted;
+                if (onRecordJobStartHandler != null) onRecordJobStartHandler.run();
 
-            StringBuilder responseText_out = new StringBuilder();
-            doServerRequest(recordEndpoint, responseText_out);
+                StringBuilder responseText_out = new StringBuilder();
+                doServerRequest(recordEndpoint, responseText_out);
 
-            if (onRecordResponseHandler != null) onRecordResponseHandler.run(responseText_out.toString());
+                if (onRecordResponseHandler != null) onRecordResponseHandler.run(responseText_out.toString());
 
-            state = State.recordingJobFinished;
+                state = State.recordingJobFinished;
         }
     };
     /**
@@ -160,6 +175,7 @@ public final class MSimpleSpeechClient {
             state = State.firstConnectionJobFinished;
         }
     };
+
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
@@ -180,11 +196,12 @@ public final class MSimpleSpeechClient {
         sslContext.init(null, tmf.getTrustManagers(), null);
         HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
     }
+
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
     public final void submitRecordJob() {
-        executor.execute(recordJob);
+       if(recordEndpoint != null) executor.execute(recordJob);
     }
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved

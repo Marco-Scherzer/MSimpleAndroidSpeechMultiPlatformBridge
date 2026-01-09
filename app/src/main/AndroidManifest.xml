@@ -9,6 +9,11 @@
     <!-- Netzwerkberechtigung für lokalen HTTP-Server -->
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Erlaubt Empfang von Media-Button-Events (Headset, Bluetooth, Auto) -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"
+        tools:targetApi="s" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -19,15 +24,29 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Msimplespeechbackend">
 
-        <!-- MMain als Start-Activity -->
+        <!-- Start-Activity -->
         <activity
-         android:name="com.marcoscherzer.msimplespeechbackend.app.MMain"
-         android:exported="true">
-         <intent-filter>
-             <action android:name="android.intent.action.MAIN" />
-             <category android:name="android.intent.category.LAUNCHER" />
-         </intent-filter>
-     </activity>
+            android:name="com.marcoscherzer.msimplespeechbackend.app.MMain"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
 
- </application>
+        <!-- Media-Button Receiver (Headset-Hook, Bluetooth-Buttons, Auto-Freisprecheinrichtung) -->
+        <receiver
+            android:name="com.marcoscherzer.msimplespeechbackend.app.MMediaButtonReceiver"
+            android:exported="true">
+
+            <!-- Priorität hochsetzen, damit App zuerst den Button bekommt -->
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+
+        </receiver>
+
+    </application>
+
 </manifest>
+
