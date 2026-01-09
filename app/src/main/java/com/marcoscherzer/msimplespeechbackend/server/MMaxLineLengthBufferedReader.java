@@ -13,9 +13,9 @@ import java.io.Reader;
  * A safe line reader that prevents unbounded memory usage by limiting
  * the maximum allowed line length.
  */
-public final class MMaxLineLengthLineReader extends BufferedReader {
+public final class MMaxLineLengthBufferedReader extends BufferedReader {
 
-    public MMaxLineLengthLineReader(Reader in) {
+    public MMaxLineLengthBufferedReader(Reader in) {
         super(in);
     }
 

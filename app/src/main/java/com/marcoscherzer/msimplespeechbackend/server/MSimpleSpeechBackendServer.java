@@ -33,7 +33,7 @@ public final class MSimpleSpeechBackendServer {
      * @version 0.0.1
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static class MClientInformation {
+    public static final class MClientInformation {
         /**
          * @version 0.0.1
          * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -49,7 +49,7 @@ public final class MSimpleSpeechBackendServer {
         private String registeredClientId;
 
         @Override
-        public String toString() {
+        public final String toString() {
             return "MClientInformation{" +
                     "nextRecordEndpoint='" + nextRecordEndpoint + '\'' +
                     ", ip='" + ip + '\'' +
@@ -59,7 +59,9 @@ public final class MSimpleSpeechBackendServer {
     }
 
     private MClientInformation clientInformation;
-    private static final String UUID_REGEX = "^[A-Za-z0-9_-]{1,64}$";
+    private static final String UUID_REGEX = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
+    private static final int UUID_REGEX_LENGTH = 32+4;
+    private static final String INITIALIZE_UUID = "8f3c2b4e-7c1a-4d8a-9e3e-2b0f6a9d4c12";//um extrastring prüfung für "init" zu sparen
 
     /**
      * @version 0.0.2 ,  raw SSL-Sockets
@@ -122,15 +124,16 @@ public final class MSimpleSpeechBackendServer {
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     private void handleClient(Socket socket) {
-        MMaxLineLengthLineReader reader = null;
+            MMaxLineLengthBufferedReader reader = null;
             PrintWriter writer = null;
-
             try {
-                reader = new MMaxLineLengthLineReader(new InputStreamReader(socket.getInputStream()));
+                socket.setSoTimeout(3000);//initialtimeout vor upgrade
+                reader = new MMaxLineLengthBufferedReader(new InputStreamReader(socket.getInputStream()));
                 writer = new PrintWriter(socket.getOutputStream(), true);
 
                 // Erste Zeile: Client-ID
-                String incomingClientId = reader.readLine(200);
+                String incomingClientId = reader.readLine(UUID_REGEX_LENGTH);
+                if (incomingClientId != null) incomingClientId = incomingClientId.trim();
                 out.println("Incoming clientId: " + incomingClientId);
 
                 if (incomingClientId == null || !incomingClientId.matches(UUID_REGEX)) {
@@ -140,7 +143,8 @@ public final class MSimpleSpeechBackendServer {
                 }
 
                 // Zweite Zeile: Endpoint Request
-                String requestEndpoint = reader.readLine(200);
+                String requestEndpoint = reader.readLine(UUID_REGEX_LENGTH);
+                if (requestEndpoint != null) requestEndpoint = requestEndpoint.trim();
                 out.println("Request endpoint: " + requestEndpoint);
 
                 if (requestEndpoint == null || !requestEndpoint.matches(UUID_REGEX)) {
@@ -149,8 +153,8 @@ public final class MSimpleSpeechBackendServer {
                     return;
                 }
 
-                // Registrierung
-                if (requestEndpoint.equals("initialize") && clientInformation.registeredClientId == null) {
+                // Registrierung ( z.B. connect Button )
+                if (requestEndpoint.equals(INITIALIZE_UUID) && clientInformation.registeredClientId == null) {
                     clientInformation.registeredClientId = incomingClientId;
                     clientInformation.ip = socket.getInetAddress().getHostAddress();
                     out.println("Registered new client ID = \"" + incomingClientId + "\"");
@@ -171,6 +175,7 @@ public final class MSimpleSpeechBackendServer {
                     return;
                 }
 
+                // Speech Recognition ( z.B. record Button )
                 if (clientInformation.nextRecordEndpoint.equals(requestEndpoint)) {
                     String results = "";
                     if (isPaired()) {
@@ -215,7 +220,7 @@ public final class MSimpleSpeechBackendServer {
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final boolean isPaired() {
-        return !clientInformation.nextRecordEndpoint.equals("initialize");
+        return !clientInformation.nextRecordEndpoint.equals(INITIALIZE_UUID);
     }
     /**
      * @version 0.0.1

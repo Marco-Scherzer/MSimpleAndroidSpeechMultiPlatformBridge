@@ -44,6 +44,8 @@ public final class MSimpleSpeechClient {
     private String recordEndpoint;
 
     public PrintStream out;
+
+    private static final String INITIALIZE_UUID = "8f3c2b4e-7c1a-4d8a-9e3e-2b0f6a9d4c12";
     /**
      * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
@@ -138,7 +140,7 @@ public final class MSimpleSpeechClient {
             }
         } catch (Exception exc) {
              out.println("Exception " + exc.getMessage());
-            if ("initialize".equals(endpoint)) {
+            if (INITIALIZE_UUID.equals(endpoint)) {
                 if (onFirstConnectionFailureHandler != null) {
                     onFirstConnectionFailureHandler.run(exc.getMessage());
                 }
@@ -175,7 +177,7 @@ public final class MSimpleSpeechClient {
             if (onFirstConnectionJobStartHandler != null) onFirstConnectionJobStartHandler.run();
 
             StringBuilder responseText_out = new StringBuilder();
-            doServerRequest("initialize", responseText_out);
+            doServerRequest(INITIALIZE_UUID, responseText_out);
 
             if (onFirstConnectionResponseHandler != null) onFirstConnectionResponseHandler.run(responseText_out.toString());
 
