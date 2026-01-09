@@ -34,7 +34,14 @@ public final class MSimpleSpeechBackendServer {
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public static class MClientInformation {
-        private String nextRecordEndpoint = "/initialize";
+        /**
+         * @version 0.0.1
+         * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         */
+        MClientInformation(String nextRecordEndpoint, String ip, String registeredClientId){
+            this.nextRecordEndpoint = nextRecordEndpoint; this.ip = ip; this.registeredClientId = registeredClientId;
+        }
+        private String nextRecordEndpoint;
         private String ip;
         private String registeredClientId;
 
@@ -48,7 +55,7 @@ public final class MSimpleSpeechBackendServer {
         }
     }
 
-    private final MClientInformation clientInformation = new MClientInformation();
+    private MClientInformation clientInformation;
     private static final String ALLOWED_CLIENT_ID_REGEX = "^[A-Za-z0-9_-]{1,64}$";
 
     /**
@@ -87,6 +94,7 @@ public final class MSimpleSpeechBackendServer {
      */
     public final void start() {
         out.println("Starting server...");
+        clientInformation = new MClientInformation("/initialize", null, null);
         pool.submit(() -> {
             while (!canceled) {
                 try {
@@ -94,6 +102,7 @@ public final class MSimpleSpeechBackendServer {
                     Socket socket = serverSocket.accept();
                     out.println("new connection accepted...");
                     handleClient(socket);
+                    socket.close();
                 } catch (IOException e) {
                     if (!canceled) e.printStackTrace(out);
                 }
@@ -119,8 +128,14 @@ public final class MSimpleSpeechBackendServer {
                 return;
             }
 
-            // Registrierung oder Validierung
-            if (clientInformation.registeredClientId == null) {
+            // Zweite Zeile: Endpoint Request
+            String requestEndpoint = reader.readLine();
+            out.println("Request endpoint: " + requestEndpoint);
+
+
+
+            // Registrierung
+            if (requestEndpoint.equals("/initialize")) {  // z.b. connect button
                 clientInformation.registeredClientId = incomingClientId;
                 clientInformation.ip = socket.getInetAddress().getHostAddress();
                 out.println("Registered new client ID = \"" + incomingClientId + "\"");
@@ -139,11 +154,7 @@ public final class MSimpleSpeechBackendServer {
                 return;
             }
 
-            // Zweite Zeile: Endpoint Request
-            String requestEndpoint = reader.readLine();
-            out.println("Request endpoint: " + requestEndpoint);
-
-            if (requestEndpoint != null && requestEndpoint.equals(clientInformation.nextRecordEndpoint)) {
+            if ( clientInformation.nextRecordEndpoint.equals(requestEndpoint) ) { // z.b mic button
                 String results = "";
                 if (isPaired()) {
                     out.println("Starting recognizer...");
@@ -193,16 +204,7 @@ public final class MSimpleSpeechBackendServer {
     public final void setOnPair(Runnable handler) {
         this.onPairHandler = handler;
     }
-    /**
-     * @version 0.0.1
-     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public final void reset() {
-        out.println("Resetting server state...");
-        clientInformation.nextRecordEndpoint = "/initialize";
-        clientInformation.registeredClientId = null;
-        out.println("State reset complete.");
-    }
+
 }
 
 
