@@ -56,7 +56,7 @@ public final class MSimpleSpeechBackendServer {
     }
 
     private MClientInformation clientInformation;
-    private static final String ALLOWED_CLIENT_ID_REGEX = "^[A-Za-z0-9_-]{1,64}$";
+    private static final String UUID_REGEX = "^[A-Za-z0-9_-]{1,64}$";
 
     /**
      * @version 0.0.2 ,  raw SSL-Sockets
@@ -115,72 +115,80 @@ public final class MSimpleSpeechBackendServer {
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     private void handleClient(Socket socket) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-              PrintWriter writer = new PrintWriter(socket.getOutputStream(), true)) {
+            BufferedReader reader = null;
+            PrintWriter writer = null;
 
-            // Erste Zeile: Client-ID
-            String incomingClientId = reader.readLine();
-            out.println("Incoming clientId: " + incomingClientId);
+            try {
+                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                writer = new PrintWriter(socket.getOutputStream(), true);
 
-            if (incomingClientId == null || !incomingClientId.matches(ALLOWED_CLIENT_ID_REGEX)) {
-                writer.println("error");
-                writer.println("Invalid client ID");
-                return;
-            }
+                // Erste Zeile: Client-ID
+                String incomingClientId = reader.readLine();
+                out.println("Incoming clientId: " + incomingClientId);
 
-            // Zweite Zeile: Endpoint Request
-            String requestEndpoint = reader.readLine();
-            out.println("Request endpoint: " + requestEndpoint);
-
-            if (requestEndpoint == null || !requestEndpoint.matches(ALLOWED_CLIENT_ID_REGEX)) {
-                writer.println("error");
-                writer.println("Invalid requestEndpoint");
-                return;
-            }
-
-
-            // Registrierung
-            if (requestEndpoint.equals("initialize") && clientInformation.registeredClientId==null) {  // z.b. connect button
-                clientInformation.registeredClientId = incomingClientId;
-                clientInformation.ip = socket.getInetAddress().getHostAddress();
-                out.println("Registered new client ID = \"" + incomingClientId + "\"");
-
-                if (onPairHandler != null) {
-                    onPairHandler.run();
-                }
-                clientInformation.nextRecordEndpoint = UUID.randomUUID().toString();
-                // Erste Antwort beim Pairing
-                writer.println(clientInformation.nextRecordEndpoint);
-                writer.println("Paired successfully");
-                return;
-            } else if (!incomingClientId.equals(clientInformation.registeredClientId)) {
-                writer.println("error");
-                writer.println("Unknown client");
-                return;
-            }
-
-            if ( clientInformation.nextRecordEndpoint.equals(requestEndpoint) ) { // z.b mic button
-                String results = "";
-                if (isPaired()) {
-                    out.println("Starting recognizer...");
-                    recognizer.startListening();
-                    results = recognizer.waitOnResults();
-                    out.println("Recognition complete.");
+                if (incomingClientId == null || !incomingClientId.matches(UUID_REGEX)) {
+                    writer.println("error");
+                    writer.println("Invalid client ID");
+                    return;
                 }
 
-                // Antwortformat: Erste Zeile = neuer Endpoint, Zweite Zeile = Content
-                clientInformation.nextRecordEndpoint = UUID.randomUUID().toString();
-                writer.println(clientInformation.nextRecordEndpoint);
-                writer.println(results);
+                // Zweite Zeile: Endpoint Request
+                String requestEndpoint = reader.readLine();
+                out.println("Request endpoint: " + requestEndpoint);
 
-            } else {
-                writer.println("error");
-                writer.println("Unknown or expired endpoint");
+                if (requestEndpoint == null || !requestEndpoint.matches(UUID_REGEX)) {
+                    writer.println("error");
+                    writer.println("Invalid requestEndpoint");
+                    return;
+                }
+
+                // Registrierung
+                if (requestEndpoint.equals("initialize") && clientInformation.registeredClientId == null) {
+                    clientInformation.registeredClientId = incomingClientId;
+                    clientInformation.ip = socket.getInetAddress().getHostAddress();
+                    out.println("Registered new client ID = \"" + incomingClientId + "\"");
+
+                    if (onPairHandler != null) {
+                        onPairHandler.run();
+                    }
+
+                    clientInformation.nextRecordEndpoint = UUID.randomUUID().toString();
+
+                    writer.println(clientInformation.nextRecordEndpoint);
+                    writer.println("Paired successfully");
+                    return;
+
+                } else if (!incomingClientId.equals(clientInformation.registeredClientId)) {
+                    writer.println("error");
+                    writer.println("Unknown client");
+                    return;
+                }
+
+                if (clientInformation.nextRecordEndpoint.equals(requestEndpoint)) {
+                    String results = "";
+                    if (isPaired()) {
+                        out.println("Starting recognizer...");
+                        recognizer.startListening();
+                        results = recognizer.waitOnResults();
+                        out.println("Recognition complete.");
+                    }
+
+                    clientInformation.nextRecordEndpoint = UUID.randomUUID().toString();
+                    writer.println(clientInformation.nextRecordEndpoint);
+                    writer.println(results);
+
+                } else {
+                    writer.println("error");
+                    writer.println("Unknown or expired endpoint");
+                }
+
+            } catch (Exception exc) {
+                exc.printStackTrace(out);
+            } finally {
+                try { if (reader != null) reader.close();} catch (IOException exc) {}
+                if (writer != null) writer.close();
+                try {socket.close();} catch (IOException exc) {}
             }
-
-        } catch (Exception e) {
-            e.printStackTrace(out);
-        }
     }
     /**
      * @version 0.0.2 ,  raw SSL-Sockets
