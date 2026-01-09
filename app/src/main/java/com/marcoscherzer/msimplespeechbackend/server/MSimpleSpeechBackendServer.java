@@ -152,7 +152,6 @@ public final class MSimpleSpeechBackendServer {
                     out.println("Recognition complete.");
                 }
 
-
                 // Antwortformat: Erste Zeile = neuer Endpoint, Zweite Zeile = Content
                 clientInformation.nextRecordEndpoint = "/" + UUID.randomUUID().toString();
                 writer.println(clientInformation.nextRecordEndpoint);

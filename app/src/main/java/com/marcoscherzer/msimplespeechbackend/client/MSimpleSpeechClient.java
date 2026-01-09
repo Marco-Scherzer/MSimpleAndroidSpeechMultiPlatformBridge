@@ -44,7 +44,9 @@ public final class MSimpleSpeechClient {
     private String recordEndpoint;
 
     public PrintStream out;
-
+    /**
+     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public static enum State {
         firstConnectionJobStarted,
         firstConnectionJobFinished,
