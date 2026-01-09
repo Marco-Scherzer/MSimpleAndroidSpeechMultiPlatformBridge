@@ -75,7 +75,7 @@ public final class MMain extends AppCompatActivity {
                server = serverCreator.createServer( speechRecognitionManager );
            });
 
-           //gui.getClientPanel().getRecordButton().setEnabled(false);
+           gui.getClientPanel().getRecordButton().setEnabled(false);
            CertificateFactory cf = CertificateFactory.getInstance("X.509");
            try (InputStream caInput = gui.getLayout().getContext().getResources().openRawResource(R.raw.speechcert)) {
                ca = cf.generateCertificate(caInput);

@@ -19,11 +19,12 @@ public final class MIntentBasedSpeechRecognitionManager extends MISpeechRecognit
     private String resultText = "";
     private CountDownLatch latch;
 
-    public MIntentBasedSpeechRecognitionManager(Context context) {
-        if (!(context instanceof Activity)) {
-            throw new IllegalArgumentException("Context must be an Activity");
-        }
-        this.activity = (Activity) context;
+    /**
+     *@version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * Startet den Google-Sprachdialog
+     */
+    public MIntentBasedSpeechRecognitionManager(Activity context) {
+        this.activity = context;
     }
 
     /**
