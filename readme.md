@@ -15,7 +15,9 @@
 
 - **Secure pairing: Allows only secure 1:1 paired communication between a client device and the Android device**
 
-- **2 speech recognition modes choosable for server-side: implementation 1 uses Android's SpeechRecognizer, implementation 2 uses a RecognizerIntent 
+- **2 speech recognition modes choosable for server-side: implementation 1 uses Android's SpeechRecognizer, implementation 2 uses a RecognizerIntent**
+
+- **Sends no direct audio streams via network/https: Instead uses the Android connected microphone to transmit audio and sends the recognized text to the registerd/paired client device**
 
 - **Use can be low distance‑secured by the physical range of the microphone connected to the Android (server) device**
 
