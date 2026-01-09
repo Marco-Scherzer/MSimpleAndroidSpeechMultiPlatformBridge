@@ -24,10 +24,28 @@ public final class MSimpleSpeechBackendServer {
     private final NanoHTTPD server;
     private final MISpeechRecognitionManager recognizer;
 
-    private String registeredClientId = null;
-    private String nextRecordEndpoint = "/initialize";
     private Runnable onPairHandler;
     public PrintStream out;
+
+    /**
+     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public static class MClientInformation{
+        private String nextRecordEndpoint = "/initialize";
+        private String ip;
+
+        private String registeredClientId;
+
+        @Override
+        public String toString() {
+            return "MClientInformation" +
+                    "nextRecordEndpoint='" + (nextRecordEndpoint != null ? nextRecordEndpoint : "null") + '\'' +
+                    ", ip='" + (ip != null ? ip : "null") + '\'' +
+                    ", registeredClientId='" + (registeredClientId != null ? registeredClientId : "null") + '\'';
+        }
+    }
+
+    private MClientInformation clientInformation;
 
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -61,12 +79,12 @@ public final class MSimpleSpeechBackendServer {
                     return NanoHTTPD.newFixedLengthResponse(Status.BAD_REQUEST, "text/plain", "Missing X-Client-ID header");
                 }
 
-                if (registeredClientId == null) {
-                    registeredClientId = clientId;
+                if (clientInformation.registeredClientId == null) {
+                    clientInformation.registeredClientId = clientId;
                     out.println("Registered new client ID =  \"" + clientId + "\"");
                 }
 
-                if (!clientId.equals(registeredClientId)) {
+                if (!clientId.equals(clientInformation.registeredClientId)) {
                     return NanoHTTPD.newFixedLengthResponse(Status.NOT_FOUND, "text/plain", "Unknown client");
                 }
 
@@ -74,7 +92,7 @@ public final class MSimpleSpeechBackendServer {
                     onPairHandler.run();
                 }
 
-                if (session.getUri().equals(nextRecordEndpoint)) {
+                if (session.getUri().equals(clientInformation.nextRecordEndpoint)) {
                     String results = "";
                     if (isPaired()) {
                         out.println("Starting recognizer...");
@@ -82,10 +100,10 @@ public final class MSimpleSpeechBackendServer {
                         results = recognizer.waitOnResults();
                         out.println("Recognition complete.");
                     }
-                    nextRecordEndpoint = "/" + UUID.randomUUID().toString();
-                    out.println("Generated new record endpoint = \"" + nextRecordEndpoint + "\"");
+                    clientInformation.nextRecordEndpoint = "/" + UUID.randomUUID().toString();
+                    out.println("Generated new record endpoint = \"" + clientInformation.nextRecordEndpoint + "\"");
                     Response response = NanoHTTPD.newFixedLengthResponse(Status.OK, "text/plain", results);
-                    response.addHeader("X-Record-Endpoint", nextRecordEndpoint);
+                    response.addHeader("X-Record-Endpoint", clientInformation.nextRecordEndpoint);
                     return response;
                 }
 
@@ -97,6 +115,15 @@ public final class MSimpleSpeechBackendServer {
         server.makeSecure(sslContext.getServerSocketFactory(), null);
         out.println("Server initialized on port " + port);
     }
+
+
+    /**
+     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final MClientInformation getClientInformation() {
+        return clientInformation;
+    }
+
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
@@ -116,7 +143,7 @@ public final class MSimpleSpeechBackendServer {
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-    public void start() throws Exception {
+    public final void start() throws Exception {
         out.println("Starting server...");
         server.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
         out.println("Server started.\nWaiting for client to pair...");
@@ -124,7 +151,7 @@ public final class MSimpleSpeechBackendServer {
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-    public void stop() {
+    public final void stop() {
         out.println("Stopping server...");
         server.stop();
         out.println("Server stopped.");
@@ -132,14 +159,14 @@ public final class MSimpleSpeechBackendServer {
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-    public boolean isPaired() {
-        boolean paired = !nextRecordEndpoint.equals("/initialize");
+    public final boolean isPaired() {
+        boolean paired = !clientInformation.nextRecordEndpoint.equals("/initialize");
         return paired;
     }
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-    public void setOnPair(Runnable handler) {
+    public final void setOnPair(Runnable handler) {
         this.onPairHandler = handler;
     }
 
@@ -147,10 +174,10 @@ public final class MSimpleSpeechBackendServer {
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-    public void reset() {
+    public final void reset() {
         out.println("Resetting server state...");
-        nextRecordEndpoint = "/initialize";
-        registeredClientId = null;
+        clientInformation.nextRecordEndpoint = "/initialize";
+        clientInformation.registeredClientId = null;
         out.println("State reset complete.");
     }
     /**

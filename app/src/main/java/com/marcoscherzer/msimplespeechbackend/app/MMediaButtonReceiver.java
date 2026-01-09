@@ -41,7 +41,7 @@ public class MMediaButtonReceiver extends BroadcastReceiver {
                 System.out.println("MMediaButtonReceiver: Headset hook pressed → triggering speech job");
 
                 //MMain.get().getClient().submitRecordJob();
-
+                MMain.get().getServer().getClientInformation();
 
             } else {
                 System.out.println("MMediaButtonReceiver: Unhandled media keyCode = " + event.getKeyCode());

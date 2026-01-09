@@ -41,7 +41,9 @@ public final class MMain extends AppCompatActivity {
     private Certificate ca;
 
     public static MMain get() { return instance; }
-    public MSimpleSpeechClient getClient() { return client; }
+    //public MSimpleSpeechClient getClient() { return client; }
+
+    public MSimpleSpeechBackendServer getServer() { return server; }
 
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
