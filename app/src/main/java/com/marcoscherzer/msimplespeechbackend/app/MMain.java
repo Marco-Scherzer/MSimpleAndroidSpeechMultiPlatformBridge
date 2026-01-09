@@ -40,9 +40,14 @@ public final class MMain extends AppCompatActivity {
     MSimpleSpeechServerCreator serverCreator;
     private Certificate ca;
 
+    /**
+     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public static MMain get() { return instance; }
-    //public MSimpleSpeechClient getClient() { return client; }
 
+    /**
+     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public MSimpleSpeechBackendServer getServer() { return server; }
 
     /**
