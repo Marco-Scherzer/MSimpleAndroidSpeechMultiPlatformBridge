@@ -138,7 +138,7 @@ public final class MSimpleSpeechClient {
             }
         } catch (Exception exc) {
              out.println("Exception " + exc.getMessage());
-            if ("/initialize".equals(endpoint)) {
+            if ("initialize".equals(endpoint)) {
                 if (onFirstConnectionFailureHandler != null) {
                     onFirstConnectionFailureHandler.run(exc.getMessage());
                 }
@@ -175,7 +175,7 @@ public final class MSimpleSpeechClient {
             if (onFirstConnectionJobStartHandler != null) onFirstConnectionJobStartHandler.run();
 
             StringBuilder responseText_out = new StringBuilder();
-            doServerRequest("/initialize", responseText_out);
+            doServerRequest("initialize", responseText_out);
 
             if (onFirstConnectionResponseHandler != null) onFirstConnectionResponseHandler.run(responseText_out.toString());
 

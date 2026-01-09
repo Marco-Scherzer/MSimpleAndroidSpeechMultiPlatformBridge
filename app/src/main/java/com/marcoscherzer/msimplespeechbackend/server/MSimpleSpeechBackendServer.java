@@ -94,7 +94,7 @@ public final class MSimpleSpeechBackendServer {
      */
     public final void start() {
         out.println("Starting server...");
-        clientInformation = new MClientInformation("/initialize", null, null);
+        clientInformation = new MClientInformation("initialize", null, null);
         pool.submit(() -> {
             while (!canceled) {
                 try {
@@ -123,7 +123,7 @@ public final class MSimpleSpeechBackendServer {
             out.println("Incoming clientId: " + incomingClientId);
 
             if (incomingClientId == null || !incomingClientId.matches(ALLOWED_CLIENT_ID_REGEX)) {
-                writer.println("/error");
+                writer.println("error");
                 writer.println("Invalid client ID");
                 return;
             }
@@ -132,10 +132,15 @@ public final class MSimpleSpeechBackendServer {
             String requestEndpoint = reader.readLine();
             out.println("Request endpoint: " + requestEndpoint);
 
+            if (requestEndpoint == null || !requestEndpoint.matches(ALLOWED_CLIENT_ID_REGEX)) {
+                writer.println("error");
+                writer.println("Invalid requestEndpoint");
+                return;
+            }
 
 
             // Registrierung
-            if (requestEndpoint.equals("/initialize")) {  // z.b. connect button
+            if (requestEndpoint.equals("initialize") && clientInformation.registeredClientId==null) {  // z.b. connect button
                 clientInformation.registeredClientId = incomingClientId;
                 clientInformation.ip = socket.getInetAddress().getHostAddress();
                 out.println("Registered new client ID = \"" + incomingClientId + "\"");
@@ -143,13 +148,13 @@ public final class MSimpleSpeechBackendServer {
                 if (onPairHandler != null) {
                     onPairHandler.run();
                 }
-                clientInformation.nextRecordEndpoint = "/" + UUID.randomUUID().toString();
+                clientInformation.nextRecordEndpoint = UUID.randomUUID().toString();
                 // Erste Antwort beim Pairing
                 writer.println(clientInformation.nextRecordEndpoint);
                 writer.println("Paired successfully");
                 return;
             } else if (!incomingClientId.equals(clientInformation.registeredClientId)) {
-                writer.println("/error");
+                writer.println("error");
                 writer.println("Unknown client");
                 return;
             }
@@ -164,12 +169,12 @@ public final class MSimpleSpeechBackendServer {
                 }
 
                 // Antwortformat: Erste Zeile = neuer Endpoint, Zweite Zeile = Content
-                clientInformation.nextRecordEndpoint = "/" + UUID.randomUUID().toString();
+                clientInformation.nextRecordEndpoint = UUID.randomUUID().toString();
                 writer.println(clientInformation.nextRecordEndpoint);
                 writer.println(results);
 
             } else {
-                writer.println("/error");
+                writer.println("error");
                 writer.println("Unknown or expired endpoint");
             }
 
@@ -195,7 +200,7 @@ public final class MSimpleSpeechBackendServer {
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final boolean isPaired() {
-        return !clientInformation.nextRecordEndpoint.equals("/initialize");
+        return !clientInformation.nextRecordEndpoint.equals("initialize");
     }
     /**
      * @version 0.0.1
