@@ -107,7 +107,7 @@ public final class MSimpleSpeechBackendServer {
      */
     private void handleClient(Socket socket) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true)) {
+              PrintWriter writer = new PrintWriter(socket.getOutputStream(), true)) {
 
             // Erste Zeile: Client-ID
             String incomingClientId = reader.readLine();

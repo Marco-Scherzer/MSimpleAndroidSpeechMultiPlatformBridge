@@ -135,7 +135,7 @@ public final class MSimpleSpeechClient {
                 response_out.append(response);
             }
         } catch (Exception exc) {
-            out.println("Exception " + exc.getMessage());
+             out.println("Exception " + exc.getMessage());
             if ("/initialize".equals(endpoint)) {
                 if (onFirstConnectionFailureHandler != null) {
                     onFirstConnectionFailureHandler.run(exc.getMessage());
