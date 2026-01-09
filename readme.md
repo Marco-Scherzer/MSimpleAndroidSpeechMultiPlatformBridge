@@ -6,7 +6,7 @@
 ###
 ### ( Android™ is a trademark of Google LLC. )
 ###
-#### External dependencies: nanohttpd-2.3.1.jar (because my own http-server https://github.com/Marco-Scherzer/MSimpleServer is not yet completely debugged on android. This might change in the future)
+#### External dependencies: None (uses only classes of the Runtime Platform), ensuring this little project remains independent of changes in other software.
 #### I originally developed Speech Recognition Multiplatform Bridge to use Android speech recognition within JavaFX/Gluon. It became my first Android‑specific project.
 #### Development of "Speech Recognition Multiplatform Bridge for Android" started in Summer 2025 (two weeks) and had reached approx. 2 weeks of progress when it started to work for my own simple scenario purposes.
 #### Features after 2 weeks:
