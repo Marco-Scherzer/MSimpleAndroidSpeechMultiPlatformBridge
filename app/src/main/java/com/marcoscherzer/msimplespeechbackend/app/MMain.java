@@ -118,7 +118,10 @@ public final class MMain extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             System.out.println("VOLUME UP pressed → triggering speech job");
-            if(client.isReady()) client.submitRecordJob();
+            if(client.isReady()) {
+               // System.out.println(MMain.get().getServer().getClientInformation());//dbg, später unnötig wenn client separiert
+                client.submitRecordJob();
+            }
             return true;
         }
 

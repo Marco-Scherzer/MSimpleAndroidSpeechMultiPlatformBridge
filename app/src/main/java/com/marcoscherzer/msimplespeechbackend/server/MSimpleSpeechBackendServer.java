@@ -1,132 +1,73 @@
 package com.marcoscherzer.msimplespeechbackend.server;
 
-import java.io.InputStream;
-import java.io.PrintStream;
+import java.io.*;
+import java.net.Socket;
 import java.security.KeyStore;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import android.content.Context;
 
 import com.marcoscherzer.msimplespeechbackend.R;
 
-import fi.iki.elonen.NanoHTTPD;
-import fi.iki.elonen.NanoHTTPD.Response.Status;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-
-import java.util.UUID;
-
-
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
 /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+ * @version 0.0.2 ,  raw SSL-Sockets
+ * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
 public final class MSimpleSpeechBackendServer {
 
-    private final NanoHTTPD server;
     private final MISpeechRecognitionManager recognizer;
-
     private Runnable onPairHandler;
     public PrintStream out;
 
+    private SSLServerSocket serverSocket;
+    private final ExecutorService pool = Executors.newSingleThreadExecutor();
+    private volatile boolean canceled;
+
     /**
-     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * @version 0.0.1
+     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static class MClientInformation{
+    public static class MClientInformation {
         private String nextRecordEndpoint = "/initialize";
         private String ip;
-
         private String registeredClientId;
 
         @Override
         public String toString() {
-            return "MClientInformation" +
-                    "nextRecordEndpoint='" + (nextRecordEndpoint != null ? nextRecordEndpoint : "null") + '\'' +
-                    ", ip='" + (ip != null ? ip : "null") + '\'' +
-                    ", registeredClientId='" + (registeredClientId != null ? registeredClientId : "null") + '\'';
+            return "MClientInformation{" +
+                    "nextRecordEndpoint='" + nextRecordEndpoint + '\'' +
+                    ", ip='" + ip + '\'' +
+                    ", registeredClientId='" + registeredClientId + '\'' +
+                    '}';
         }
     }
 
-    private MClientInformation clientInformation;
+    private final MClientInformation clientInformation = new MClientInformation();
+    private static final String ALLOWED_CLIENT_ID_REGEX = "^[A-Za-z0-9_-]{1,64}$";
 
     /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+     * @version 0.0.2 ,  raw SSL-Sockets
+     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public MSimpleSpeechBackendServer(int port, MISpeechRecognitionManager recognitionManager, Context context, PrintStream out) throws Exception {
-        this.recognizer= recognitionManager;
-        this.out=out;
+        this.recognizer = recognitionManager;
+        this.out = out;
         out.println("Initializing server...");
-        SSLContext sslContext= createSSLContext(context);
-        server = new NanoHTTPD(port) {
-            /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
-            @Override
-            public Response serve(IHTTPSession session) {
-                out.println("\nNew request received: " + session.getUri());
-
-                if (!"GET".equalsIgnoreCase(session.getMethod().name())) {
-                    out.println("Invalid request method: " + session.getMethod());
-                    return NanoHTTPD.newFixedLengthResponse(Status.METHOD_NOT_ALLOWED, "text/plain", "Only GET allowed");
-                }
-
-                if (isRateLimited()) {
-                    out.println("Rate limited.");
-                    return NanoHTTPD.newFixedLengthResponse(Status.TOO_MANY_REQUESTS, "text/plain", "Slow down");
-                }
-//-----------------------------------------------------
-                String clientId = session.getHeaders().get("x-client-id");
-                if (clientId == null || clientId.isEmpty()) {
-                    out.println("Missing client ID.");
-                    return NanoHTTPD.newFixedLengthResponse(Status.BAD_REQUEST, "text/plain", "Missing X-Client-ID header");
-                }
-
-                if (clientInformation.registeredClientId == null) {
-                    clientInformation.registeredClientId = clientId;
-                    out.println("Registered new client ID =  \"" + clientId + "\"");
-                }
-
-                if (!clientId.equals(clientInformation.registeredClientId)) {
-                    return NanoHTTPD.newFixedLengthResponse(Status.NOT_FOUND, "text/plain", "Unknown client");
-                }
-
-                if (!isPaired() && onPairHandler != null) {
-                    onPairHandler.run();
-                }
-
-                if (session.getUri().equals(clientInformation.nextRecordEndpoint)) {
-                    String results = "";
-                    if (isPaired()) {
-                        out.println("Starting recognizer...");
-                        recognizer.startListening();
-                        results = recognizer.waitOnResults();
-                        out.println("Recognition complete.");
-                    }
-                    clientInformation.nextRecordEndpoint = "/" + UUID.randomUUID().toString();
-                    out.println("Generated new record endpoint = \"" + clientInformation.nextRecordEndpoint + "\"");
-                    Response response = NanoHTTPD.newFixedLengthResponse(Status.OK, "text/plain", results);
-                    response.addHeader("X-Record-Endpoint", clientInformation.nextRecordEndpoint);
-                    return response;
-                }
-
-                out.println("Unknown or expired endpoint = \"" + session.getUri() + "\"");
-                return NanoHTTPD.newFixedLengthResponse(Status.NOT_FOUND, "text/plain", "Unknown or expired endpoint");
-            }
-
-        };
-        server.makeSecure(sslContext.getServerSocketFactory(), null);
+        SSLContext sslContext = createSSLContext(context);
+        SSLServerSocketFactory factory = sslContext.getServerSocketFactory();
+        serverSocket = (SSLServerSocket) factory.createServerSocket(port);
         out.println("Server initialized on port " + port);
     }
-
-
     /**
-     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * @version 0.0.2 ,  raw SSL-Sockets
+     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final MClientInformation getClientInformation() {
-        return clientInformation;
-    }
-
-    /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
     private SSLContext createSSLContext(Context context) throws Exception {
         out.println("Initializing SSL configuration...");
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
@@ -141,52 +82,131 @@ public final class MSimpleSpeechBackendServer {
         return sslContext;
     }
     /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
-    public final void start() throws Exception {
+     * @version 0.0.2 ,  raw SSL-Sockets
+     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final void start() {
         out.println("Starting server...");
-        server.start(NanoHTTPD.SOCKET_READ_TIMEOUT, false);
+        pool.submit(() -> {
+            while (!canceled) {
+                try {
+                    out.println("listening for new connection...");
+                    Socket socket = serverSocket.accept();
+                    out.println("new connection accepted...");
+                    handleClient(socket);
+                } catch (IOException e) {
+                    if (!canceled) e.printStackTrace(out);
+                }
+            }
+        });
         out.println("Server started.\nWaiting for client to pair...");
     }
     /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+     * @version 0.0.2 ,  raw SSL-Sockets
+     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    private void handleClient(Socket socket) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true)) {
+
+            // Erste Zeile: Client-ID
+            String incomingClientId = reader.readLine();
+            out.println("Incoming clientId: " + incomingClientId);
+
+            if (incomingClientId == null || !incomingClientId.matches(ALLOWED_CLIENT_ID_REGEX)) {
+                writer.println("/error");
+                writer.println("Invalid client ID");
+                return;
+            }
+
+            // Registrierung oder Validierung
+            if (clientInformation.registeredClientId == null) {
+                clientInformation.registeredClientId = incomingClientId;
+                clientInformation.ip = socket.getInetAddress().getHostAddress();
+                out.println("Registered new client ID = \"" + incomingClientId + "\"");
+
+                if (onPairHandler != null) {
+                    onPairHandler.run();
+                }
+                clientInformation.nextRecordEndpoint = "/" + UUID.randomUUID().toString();
+                // Erste Antwort beim Pairing
+                writer.println(clientInformation.nextRecordEndpoint);
+                writer.println("Paired successfully");
+                return;
+            } else if (!incomingClientId.equals(clientInformation.registeredClientId)) {
+                writer.println("/error");
+                writer.println("Unknown client");
+                return;
+            }
+
+            // Zweite Zeile: Endpoint Request
+            String requestEndpoint = reader.readLine();
+            out.println("Request endpoint: " + requestEndpoint);
+
+            if (requestEndpoint != null && requestEndpoint.equals(clientInformation.nextRecordEndpoint)) {
+                String results = "";
+                if (isPaired()) {
+                    out.println("Starting recognizer...");
+                    recognizer.startListening();
+                    results = recognizer.waitOnResults();
+                    out.println("Recognition complete.");
+                }
+
+
+                // Antwortformat: Erste Zeile = neuer Endpoint, Zweite Zeile = Content
+                clientInformation.nextRecordEndpoint = "/" + UUID.randomUUID().toString();
+                writer.println(clientInformation.nextRecordEndpoint);
+                writer.println(results);
+
+            } else {
+                writer.println("/error");
+                writer.println("Unknown or expired endpoint");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace(out);
+        }
+    }
+    /**
+     * @version 0.0.2 ,  raw SSL-Sockets
+     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public final void stop() {
         out.println("Stopping server...");
-        server.stop();
+        canceled = true;
+        pool.shutdownNow();
+        try {
+            serverSocket.close();
+        } catch (IOException ignored) {}
         out.println("Server stopped.");
     }
     /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+     * @version 0.0.1
+     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public final boolean isPaired() {
-        boolean paired = !clientInformation.nextRecordEndpoint.equals("/initialize");
-        return paired;
+        return !clientInformation.nextRecordEndpoint.equals("/initialize");
     }
     /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+     * @version 0.0.1
+     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public final void setOnPair(Runnable handler) {
         this.onPairHandler = handler;
     }
-
-
     /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
+     * @version 0.0.1
+     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     public final void reset() {
         out.println("Resetting server state...");
         clientInformation.nextRecordEndpoint = "/initialize";
         clientInformation.registeredClientId = null;
         out.println("State reset complete.");
     }
-    /**
- * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
- */
-    private boolean isRateLimited() {
-        return false;
-    }
 }
+
+
 
 
 

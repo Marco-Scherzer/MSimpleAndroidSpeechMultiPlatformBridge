@@ -13,7 +13,9 @@ import android.view.KeyEvent;
  * All rights reserved
  */
 public class MMediaButtonReceiver extends BroadcastReceiver {
-
+    /**
+     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     @Override
     public final void onReceive(Context context, Intent intent) {
 
@@ -41,7 +43,7 @@ public class MMediaButtonReceiver extends BroadcastReceiver {
                 System.out.println("MMediaButtonReceiver: Headset hook pressed → triggering speech job");
 
                 //MMain.get().getClient().submitRecordJob();
-                System.out.println(MMain.get().getServer().getClientInformation());
+               // System.out.println(MMain.get().getServer().getClientInformation());
 
             } else {
                 System.out.println("MMediaButtonReceiver: Unhandled media keyCode = " + event.getKeyCode());

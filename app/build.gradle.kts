@@ -38,7 +38,6 @@ dependencies {
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(files("Z:\\MarcoScherzer-Projects\\msimplespeechbackend\\app\\libs\\nanohttpd-2.3.1.jar"))
-
     // Test Libraries
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
