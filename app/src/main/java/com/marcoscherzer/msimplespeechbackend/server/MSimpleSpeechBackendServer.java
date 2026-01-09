@@ -38,9 +38,12 @@ public final class MSimpleSpeechBackendServer {
          * @version 0.0.1
          * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          */
-        MClientInformation(String nextRecordEndpoint, String ip, String registeredClientId){
-            this.nextRecordEndpoint = nextRecordEndpoint; this.ip = ip; this.registeredClientId = registeredClientId;
+        MClientInformation(String nextRecordEndpoint, String ip, String registeredClientId) {
+            this.nextRecordEndpoint = nextRecordEndpoint;
+            this.ip = ip;
+            this.registeredClientId = registeredClientId;
         }
+
         private String nextRecordEndpoint;
         private String ip;
         private String registeredClientId;
@@ -71,6 +74,7 @@ public final class MSimpleSpeechBackendServer {
         serverSocket = (SSLServerSocket) factory.createServerSocket(port);
         out.println("Server initialized on port " + port);
     }
+
     /**
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -88,6 +92,7 @@ public final class MSimpleSpeechBackendServer {
         sslContext.init(kmf.getKeyManagers(), null, null);
         return sslContext;
     }
+
     /**
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -110,20 +115,22 @@ public final class MSimpleSpeechBackendServer {
         });
         out.println("Server started.\nWaiting for client to pair...");
     }
+
+
     /**
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     private void handleClient(Socket socket) {
-            BufferedReader reader = null;
+        MMaxLineLengthLineReader reader = null;
             PrintWriter writer = null;
 
             try {
-                reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                reader = new MMaxLineLengthLineReader(new InputStreamReader(socket.getInputStream()));
                 writer = new PrintWriter(socket.getOutputStream(), true);
 
                 // Erste Zeile: Client-ID
-                String incomingClientId = reader.readLine();
+                String incomingClientId = reader.readLine(200);
                 out.println("Incoming clientId: " + incomingClientId);
 
                 if (incomingClientId == null || !incomingClientId.matches(UUID_REGEX)) {
@@ -133,7 +140,7 @@ public final class MSimpleSpeechBackendServer {
                 }
 
                 // Zweite Zeile: Endpoint Request
-                String requestEndpoint = reader.readLine();
+                String requestEndpoint = reader.readLine(200);
                 out.println("Request endpoint: " + requestEndpoint);
 
                 if (requestEndpoint == null || !requestEndpoint.matches(UUID_REGEX)) {
