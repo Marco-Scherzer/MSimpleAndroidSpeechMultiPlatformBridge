@@ -113,10 +113,11 @@ public final class MSimpleSpeechClient {
      * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public static enum RECORD_TRIGGER_LOCATION_MODE{
-        SERVERSIDE_CONNECTED_RECORDBUTTON,
-        CLIENTSIDE_CONNECTED_RECORDBUTTON;
+        SERVERSIDE_CONNECTED_RECORDBUTTON,  //z.B headsetbutton
+        CLIENTSIDE_CONNECTED_RECORDBUTTON; //z.B client-side softwarebutton
     }
 
+//21:26
     private RECORD_TRIGGER_LOCATION_MODE  recordTriggerLocationMode = SERVERSIDE_CONNECTED_RECORDBUTTON; //dbg
     /**
      * @version 0.0.2 ,  raw SSL-Sockets
