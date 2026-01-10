@@ -1,5 +1,7 @@
 package com.marcoscherzer.msimplespeechbackend.client;
 
+import static com.marcoscherzer.msimplespeechbackend.client.MSimpleSpeechClient.RECORD_TRIGGER_LOCATION_MODE.SERVERSIDE_CONNECTED_RECORDBUTTON;
+
 import com.marcoscherzer.msimplespeechbackend.util.MRunnable1P;
 
 import java.io.BufferedReader;
@@ -108,6 +110,15 @@ public final class MSimpleSpeechClient {
     }
 
     /**
+     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public static enum RECORD_TRIGGER_LOCATION_MODE{
+        SERVERSIDE_CONNECTED_RECORDBUTTON,
+        CLIENTSIDE_CONNECTED_RECORDBUTTON;
+    }
+
+    private RECORD_TRIGGER_LOCATION_MODE  recordTriggerLocationMode = SERVERSIDE_CONNECTED_RECORDBUTTON; //dbg
+    /**
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
@@ -125,7 +136,7 @@ public final class MSimpleSpeechClient {
                 writer.println(clientId);
                 writer.println(endpoint);
                 // poll senden für serverseitig angeschlossenen microfon button
-                writer.println("poll");
+                if(recordTriggerLocationMode == SERVERSIDE_CONNECTED_RECORDBUTTON) writer.println("poll");
 
                 // Erste Zeile = neuer Endpoint
                 recordEndpoint = reader.readLine();
