@@ -16,6 +16,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 /**
+ * 0:50
  * @version 0.0.2 ,  raw SSL-Sockets
  * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
@@ -60,7 +61,7 @@ public final class MSimpleSpeechBackendServer {
 
     private MClientInformation clientInformation;
     private static final String UUID_REGEX = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
-    private static final int UUID_REGEX_LENGTH = 32+4;
+    private static final int UUID_REGEX_LENGTH = 32 + 4;
     private static final String INITIALIZE_UUID = "8f3c2b4e-7c1a-4d8a-9e3e-2b0f6a9d4c12";//um extrastring prüfung für "init" zu sparen
 
     /**
@@ -151,6 +152,17 @@ public final class MSimpleSpeechBackendServer {
                     writer.println("error");
                     writer.println("Invalid requestEndpoint");
                     return;
+                }
+
+                // Dritte Zeile: poll or not
+                String poll = reader.readLine(4);
+                if (poll != null) {
+                    poll = poll.trim();
+                    if(poll.equals("poll")) {
+                        out.println("poll: " + poll);
+                        //initialtimeout upgrade
+                    }
+
                 }
 
                 // Registrierung ( z.B. connect Button )
