@@ -36,7 +36,7 @@ public final class MMain extends AppCompatActivity {
     MSimpleSpeechClientCreator clientCreator;
     MSimpleSpeechServerCreator serverCreator;
     private Certificate ca;
-
+    private final boolean setRecordTriggerToServerSide = false;
     /**
      * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
@@ -76,8 +76,7 @@ public final class MMain extends AppCompatActivity {
            //speechRecognitionManager = new MSpeechRecognitionManager(this);
            speechRecognitionManager = new MIntentBasedSpeechRecognitionManager(this);
            gui.getServerPanel().getResetButton().setOnClickListener(v -> {
-               server = serverCreator.createServer( speechRecognitionManager );
-               server.setRecordTriggerToServerSideRecordTrigger(false);
+               server = serverCreator.createServer( speechRecognitionManager, setRecordTriggerToServerSide);
            });
 
            gui.getClientPanel().getRecordButton().setEnabled(false);
@@ -117,8 +116,8 @@ public final class MMain extends AppCompatActivity {
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             System.out.println("VOLUME UP pressed → triggering speech job");
             if(client.isReady()) {
-                //System.out.println(MMain.get().getServer().getClientInformation());//dbg
-                server.startRecordEventAndSendResultToClient();
+               // System.out.println(MMain.get().getServer().getClientInformation());//dbg
+                if (server != null) server.startRecordEventAndSendResultToClient();
             }
             return true;
         }

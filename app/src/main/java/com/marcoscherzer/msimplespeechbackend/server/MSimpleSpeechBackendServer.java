@@ -144,8 +144,8 @@ public final class MSimpleSpeechBackendServer {
      * false  RECORD_ALWAYS_ON_REQUEST,  z.B client-side softwarebutton
      * default true RECORD_ALWAYS_ON_REQUEST,  z.B client-side softwarebutton
      */
-    public final void setRecordTriggerToServerSideRecordTrigger(boolean recordTriggerIsAtServerSideOrNot){
-        mode = recordTriggerIsAtServerSideOrNot ? RECORD_TRIGGER_LOCATION_MODE.RECORD_ONLY_ON_SERVERSIDE_EVENT : RECORD_TRIGGER_LOCATION_MODE.RECORD_ALWAYS_ON_REQUEST;
+    public final void setRecordTriggerToServerSide(boolean setRecordTriggerToServerSide){
+        mode = setRecordTriggerToServerSide ? RECORD_TRIGGER_LOCATION_MODE.RECORD_ONLY_ON_SERVERSIDE_EVENT : RECORD_TRIGGER_LOCATION_MODE.RECORD_ALWAYS_ON_REQUEST;
     }
 
 
@@ -226,11 +226,12 @@ public final class MSimpleSpeechBackendServer {
                     clientInformation.nextRecordEndpoint = UUID.randomUUID().toString();
                     writer.println(clientInformation.nextRecordEndpoint);
                     if (isPaired()) { //!clientInformation.nextRecordEndpoint.equals(INITIALIZE_UUID);
-                                System.out.println("polling and waiting for recordEvent");
                                 switch (mode) {
                                     case RECORD_ONLY_ON_SERVERSIDE_EVENT:
+
                                         // Wenn ein Event gespeichert ist sofort starten
                                         if (hasEvent) {
+                                            System.out.println("working of recordEvent triggered during reconnection");
                                             hasEvent = false;//Event verbrauchen
                                             out.println("recordEvent (queued)");
                                             recognizer.startListening();
@@ -239,6 +240,7 @@ public final class MSimpleSpeechBackendServer {
                                             break;
                                         }
 
+                                        System.out.println("polling and waiting for recordEvent");
                                         recordEventTrigger = new CompletableFuture<Void>();
                                         socket.setSoTimeout(30000);
                                         try {

@@ -11,7 +11,7 @@ import android.content.Intent;
  *
  * Weitere Implemtierungen könnten theoretisch auch die neuen web speech-apis direkt nutzen,
  * benutzung der on device speech recognition auf Android jedoch kostenlos und es ist nicht ausgeschlossen dass
- * die speechRecognizer API bald intern die neuen web speech-apis oder lokal gemini nano nutzt.
+ * die Android SpeechRecognizer API bald intern die neuen web speech-apis oder lokal gemini nano nutzt.
  * Direkte web API-Impl. für MISpeechRecognitionManager, dennoch nur sinnvoll wenn es Gründe gibt weswegen client device nicht direkt eine rest speech-api aufrufen sollte
  * , da mit web API nutzung direkt auf client aktuell klarer was verwendet wird.
  * (Eventuelle sinnhafte Anwendungfälle: nur bluetooth ohne netzwerk möglich, wenn client device unsicherer als server device bei direktem internet-access, etc.)

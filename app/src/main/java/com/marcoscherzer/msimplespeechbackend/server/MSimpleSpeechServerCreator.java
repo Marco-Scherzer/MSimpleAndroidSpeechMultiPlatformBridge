@@ -24,11 +24,12 @@ public class MSimpleSpeechServerCreator {
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-    public final MSimpleSpeechBackendServer createServer(MISpeechRecognitionManager recognitionManager) {
+    public final MSimpleSpeechBackendServer createServer(MISpeechRecognitionManager recognitionManager, boolean setRecordTriggerToServerSide) {
         try {
             gui.getResetButton().startClickAnimation("Waiting for Client...");
             if (server != null) server.stop();
             server = new MSimpleSpeechBackendServer(8443, recognitionManager, gui.getLayout().getContext(),new MSimpleConsole2TextAreaRedirector(gui.getLogArea()));
+            server.setRecordTriggerToServerSide(setRecordTriggerToServerSide);
             server.setOnPair(new Runnable() {
                 @Override
                 public void run() {
