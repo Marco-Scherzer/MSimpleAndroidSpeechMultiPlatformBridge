@@ -13,7 +13,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * @version 0.0.2 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public class MSimpleSpeechRecognitionServer extends MSimpleSpeechBackendServer{
+public class MSimpleSpeechRecognitionServer extends MSimplePairingProtocolServer {
 
     //-------------------------------------------------- Speech Recognition specific stuff ------------------------------------------------------------------------
     private final MISpeechRecognitionManager recognizer;

@@ -13,7 +13,7 @@ import com.marcoscherzer.msimplespeechbackend.R;
 import com.marcoscherzer.msimplespeechbackend.client.MSimpleSpeechClientCreator;
 import com.marcoscherzer.msimplespeechbackend.server.MISpeechRecognitionManager;
 import com.marcoscherzer.msimplespeechbackend.server.MIntentBasedSpeechRecognitionManager;
-import com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechBackendServer;
+import com.marcoscherzer.msimplespeechbackend.server.MSimplePairingProtocolServer;
 import com.marcoscherzer.msimplespeechbackend.client.MSimpleSpeechClient;
 import com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechRecognitionServer;
 import com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechServerCreator;
@@ -46,7 +46,7 @@ public final class MMain extends AppCompatActivity {
     /**
      * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleSpeechBackendServer getServer() { return server; }
+    public MSimplePairingProtocolServer getServer() { return server; }
 
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
