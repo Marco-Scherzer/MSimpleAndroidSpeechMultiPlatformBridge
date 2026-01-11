@@ -78,7 +78,7 @@ public abstract class MSimplePairingProtocolServer<TokenT> {
          * @version 0.0.2
          * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          */
-        public void setNextEndpoint(String nextEndpoint) {
+        public final void setNextEndpoint(String nextEndpoint) {
             this.nextEndpoint = nextEndpoint;
             this.currentTokenLength = nextEndpoint.length();
         }
@@ -189,7 +189,7 @@ public abstract class MSimplePairingProtocolServer<TokenT> {
                     writer.println("error");
                     writer.println("Invalid requestEndpoint");
                     if(shutdownOnPossibleSecurityRisk) stop();
-                    onInvalidRequestEndpoint.run();
+                    if(onInvalidRequestEndpoint!=null) onInvalidRequestEndpoint.run();
                     return;
                 }
 
@@ -211,7 +211,7 @@ public abstract class MSimplePairingProtocolServer<TokenT> {
                     writer.println("error");
                     writer.println("Unknown client");
                     if(shutdownOnPossibleSecurityRisk) stop();
-                    onUnknownClient.run();
+                    if(onUnknownClient!=null) onUnknownClient.run();
                     return;
                 }
                 if (isPaired()) { //!clientInformation.nextRecordEndpoint.equals(INITIALIZE_UUID);
@@ -226,7 +226,7 @@ public abstract class MSimplePairingProtocolServer<TokenT> {
                         writer.println("error");
                         writer.println("Unknown or expired endpoint");
                         if(shutdownOnPossibleSecurityRisk) stop();
-                        onUnknownOrExpiredEndpoint.run();
+                        if(onUnknownOrExpiredEndpoint!=null) onUnknownOrExpiredEndpoint.run();
                     }
                 }
 
