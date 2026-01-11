@@ -223,50 +223,50 @@ public final class MSimpleSpeechBackendServer {
 
  //---------------------------------------------- Create Payload (pairing protocol independent) ------------------------------------
                 // Speech Recognition
+                if (isPaired()) { //!clientInformation.nextRecordEndpoint.equals(INITIALIZE_UUID);
                 if (clientInformation.nextRecordEndpoint.equals(requestEndpoint)) {
                     String results;
                     clientInformation.nextRecordEndpoint = UUID.randomUUID().toString();
                     writer.println(clientInformation.nextRecordEndpoint);
-                    if (isPaired()) { //!clientInformation.nextRecordEndpoint.equals(INITIALIZE_UUID);
-                                switch (mode) {
-                                    case RECORD_ONLY_ON_SERVERSIDE_EVENT:
+                    switch (mode) {
+                        case RECORD_ONLY_ON_SERVERSIDE_EVENT:
 
-                                        // Wenn ein Event gespeichert ist sofort starten
-                                        if (hasEvent) {
-                                            System.out.println("working of recordEvent triggered during reconnection");
-                                            hasEvent = false;//Event verbrauchen
-                                            out.println("recordEvent (queued)");
-                                            recognizer.startListening();
-                                            results = recognizer.waitOnResults();
-                                            writer.println(results);
-                                            break;
-                                        }
+                            // Wenn ein Event gespeichert ist sofort starten
+                            if (hasEvent) {
+                                System.out.println("working of recordEvent triggered during reconnection");
+                                hasEvent = false;//Event verbrauchen
+                                out.println("recordEvent (queued)");
+                                recognizer.startListening();
+                                results = recognizer.waitOnResults();
+                                writer.println(results);
+                                break;
+                            }
 
-                                        System.out.println("polling and waiting for recordEvent");
-                                        recordEventTrigger = new CompletableFuture<Void>();
-                                        socket.setSoTimeout(30000);
-                                        try {
-                                            recordEventTrigger.get(25000, TimeUnit.MILLISECONDS);
-                                            hasEvent=false;
-                                            System.out.println("recordEvent");
-                                            out.println("Starting recognizer...");
-                                            recognizer.startListening();
-                                            results = recognizer.waitOnResults();
-                                            out.println("Recognition complete.");
-                                            writer.println(results);
-                                        } catch (TimeoutException exc) {
-                                            System.out.println("Timeout: kein recordEvent, just polling new ");//
-                                            writer.println("");
-                                        }
-                                        break;
-                                    case RECORD_ALWAYS_ON_REQUEST:
-                                        out.println("Starting recognizer...");
-                                        recognizer.startListening();
-                                        results = recognizer.waitOnResults();
-                                        out.println("Recognition complete.");
-                                        writer.println(results);
-                                        break;
-                                }
+                            System.out.println("polling and waiting for recordEvent");
+                            recordEventTrigger = new CompletableFuture<Void>();
+                            socket.setSoTimeout(30000);
+                            try {
+                                recordEventTrigger.get(25000, TimeUnit.MILLISECONDS);
+                                hasEvent=false;
+                                System.out.println("recordEvent");
+                                out.println("Starting recognizer...");
+                                recognizer.startListening();
+                                results = recognizer.waitOnResults();
+                                out.println("Recognition complete.");
+                                writer.println(results);
+                            } catch (TimeoutException exc) {
+                                System.out.println("Timeout: kein recordEvent, just polling new ");//
+                                writer.println("");
+                            }
+                            break;
+                        case RECORD_ALWAYS_ON_REQUEST:
+                            out.println("Starting recognizer...");
+                            recognizer.startListening();
+                            results = recognizer.waitOnResults();
+                            out.println("Recognition complete.");
+                            writer.println(results);
+                            break;
+                    }
 
                     }
                 } else {
