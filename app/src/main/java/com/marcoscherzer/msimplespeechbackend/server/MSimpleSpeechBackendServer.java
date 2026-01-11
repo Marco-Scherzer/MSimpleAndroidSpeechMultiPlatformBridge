@@ -153,7 +153,7 @@ public final class MSimpleSpeechBackendServer {
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final void startRecordEvent() throws UnsupportedOperationException{
+    public final void startRecordEventAndSendResultToClient() throws UnsupportedOperationException{
         if( mode == RECORD_TRIGGER_LOCATION_MODE.RECORD_ONLY_ON_SERVERSIDE_EVENT) {
             hasEvent = true;
             if (recordEventTrigger != null) {
