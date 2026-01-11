@@ -14,9 +14,33 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 /**
- * 11.01.2026 14:08
  * @version 0.0.2 ,  raw SSL-Sockets
- * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+ * @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+---
+## Protocol Definition (my own custom network device pairing protocol)
+
+### Handshake
+- **Step 0:** The user has to start the pairing handshake process on the server (e.g., by pressing a button)
+- **Step 1:** The client registers with it's token ID at the server.
+- **Step 2:** The server answers with a one time usable endpoint-token for the next request.
+
+
+### Content Transmission
+- **Step 3:** The client requests the next content by using the one-time usable endpoint-token.
+- **Step 4:** The server sends the content plus the next one‑time usable endpoint-token … and so on (3,4, 3,4, …)
+
+
+ **Security Features:**
+1. Once a client was connected for the first time, the server blocks any other (unknown) client that has another ID pr tries to connect to the paired server.
+
+2. The One‑time usable endpoints(tokens) make it impossible to reuse the current prepared endpoint-token.
+If an unauthenticated client steals the ID and uses the current endpoint-token, the authenticated client cannot use the endpoint anymore and so cannot connect.
+This indicates unauthenticated use (and can optionally trigger an alarm on the client-side as well as on the server-side).
+Establishing a new connection after a case of unauthenticated use forces the user to actively restart the pairing (handshake) process on the server (e.g., by pressing a button) to reconnect and so to prevent unauthorized access.
+
+3. Protocol-Mode shutdownOnPossibleSecurityRisk:
+If shutdownOnPossibleSecurityRisk protocol‑mode is activated and the authenticated client cannot connect, or a client with a wrong ID or endpoint tries to connect, the server is, for security reasons, shut down immediately and has to be restarted actively by the user (e.g., by pressing a button), and the pairing with the client has to be renewed.
+---
  */
 public abstract class MSimplePairingProtocolServer {
 
