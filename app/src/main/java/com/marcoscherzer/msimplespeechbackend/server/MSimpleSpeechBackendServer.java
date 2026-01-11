@@ -203,53 +203,44 @@ public final class MSimpleSpeechBackendServer {
                 }
 
                 // Speech Recognition ( server side record Button )
-                if(mode == SERVERSIDE_CONNECTED_RECORDBUTTON)
                 if (clientInformation.nextRecordEndpoint.equals(requestEndpoint)) {
                     String results;
                     clientInformation.nextRecordEndpoint = UUID.randomUUID().toString();
                     writer.println(clientInformation.nextRecordEndpoint);
                     if (isPaired()) {
-                            recordEventTrigger = new CompletableFuture<Void>();
-                            socket.setSoTimeout(30000);
-                            try {
                                 System.out.println("polling and waiting for recordEvent");
-                                recordEventTrigger.get(25000, TimeUnit.MILLISECONDS);
-                                System.out.println("recordEvent");
-                                out.println("Starting recognizer...");
-                                recognizer.startListening();
-                                results = recognizer.waitOnResults();
-                                out.println("Recognition complete.");
-                                writer.println(results);
-                            } catch (TimeoutException exc) {
-                                System.out.println("Timeout: kein recordEvent, just polling new ");//
-                                writer.println("");
-                            }
+                                switch (mode) {
+                                    case SERVERSIDE_CONNECTED_RECORDBUTTON:
+                                        recordEventTrigger = new CompletableFuture<Void>();
+                                        socket.setSoTimeout(30000);
+                                        try {
+                                            recordEventTrigger.get(25000, TimeUnit.MILLISECONDS);
+                                            System.out.println("recordEvent");
+                                            out.println("Starting recognizer...");
+                                            recognizer.startListening();
+                                            results = recognizer.waitOnResults();
+                                            out.println("Recognition complete.");
+                                            writer.println(results);
+                                        } catch (TimeoutException exc) {
+                                            System.out.println("Timeout: kein recordEvent, just polling new ");//
+                                            writer.println("");
+                                        }
+                                        break;
+                                    case CLIENTSIDE_CONNECTED_RECORDBUTTON:
+                                        out.println("Starting recognizer...");
+                                        recognizer.startListening();
+                                        results = recognizer.waitOnResults();
+                                        out.println("Recognition complete.");
+                                        writer.println(results);
+                                        break;
+                                }
+
                     }
                 } else {
                     writer.println("error");
                     writer.println("Unknown or expired endpoint");
                 }
 
-
-                // Speech Recognition ( client side record Button )
-                if(mode == CLIENTSIDE_CONNECTED_RECORDBUTTON)
-                if (clientInformation.nextRecordEndpoint.equals(requestEndpoint)) {
-                    String results = "";
-                    if (isPaired()) {
-                        out.println("Starting recognizer...");
-                        recognizer.startListening();
-                        results = recognizer.waitOnResults();
-                        out.println("Recognition complete.");
-                    }
-
-                    clientInformation.nextRecordEndpoint = UUID.randomUUID().toString();
-                    writer.println(clientInformation.nextRecordEndpoint);
-                    writer.println(results);
-
-                } else {
-                    writer.println("error");
-                    writer.println("Unknown or expired endpoint");
-                }
 
             } catch (Exception exc) {
                 exc.printStackTrace(out);
