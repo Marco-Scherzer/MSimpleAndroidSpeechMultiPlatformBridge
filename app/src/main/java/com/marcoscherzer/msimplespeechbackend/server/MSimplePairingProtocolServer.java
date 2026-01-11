@@ -25,6 +25,7 @@ public abstract class MSimplePairingProtocolServer {
     private SSLServerSocket serverSocket;
     private final ExecutorService serverLoop = Executors.newSingleThreadExecutor();
     private volatile boolean canceled;
+    private boolean shutdownOnPossibleSecurityRisk = false;
 
     /**
      * @version 0.0.1
@@ -96,7 +97,7 @@ public abstract class MSimplePairingProtocolServer {
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final void start() {
+    public final void start(boolean shutdownOnPossibleSecurityRisk) {
         out.println("Starting server...");
         clientInformation = new MClientInformation("initialize", null, null);
         serverLoop.submit(() -> {
@@ -167,6 +168,7 @@ public abstract class MSimplePairingProtocolServer {
                 } else if (!incomingClientId.equals(clientInformation.registeredClientId)) {
                     writer.println("error");
                     writer.println("Unknown client");
+                    if(shutdownOnPossibleSecurityRisk) stop();
                     return;
                 }
                 if (isPaired()) { //!clientInformation.nextRecordEndpoint.equals(INITIALIZE_UUID);
@@ -180,6 +182,7 @@ public abstract class MSimplePairingProtocolServer {
                     } else {
                         writer.println("error");
                         writer.println("Unknown or expired endpoint");
+                        if(shutdownOnPossibleSecurityRisk) stop();
                     }
                 }
 

@@ -38,6 +38,8 @@ public final class MMain extends AppCompatActivity {
     MSimpleSpeechServerCreator serverCreator;
     private Certificate ca;
     private final boolean setRecordTriggerToServerSide = false;
+
+    private final boolean shutdownOnPossibleSecurityRisk = false;
     /**
      * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
@@ -77,7 +79,7 @@ public final class MMain extends AppCompatActivity {
            //speechRecognitionManager = new MSpeechRecognitionManager(this);
            speechRecognitionManager = new MIntentBasedSpeechRecognitionManager(this);
            gui.getServerPanel().getResetButton().setOnClickListener(v -> {
-               server = serverCreator.createServer( speechRecognitionManager, setRecordTriggerToServerSide);
+               server = serverCreator.createServer( speechRecognitionManager, setRecordTriggerToServerSide , shutdownOnPossibleSecurityRisk);
            });
 
            gui.getClientPanel().getRecordButton().setEnabled(false);

@@ -24,7 +24,7 @@ public class MSimpleSpeechServerCreator {
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-    public final MSimpleSpeechRecognitionServer createServer(MISpeechRecognitionManager recognitionManager, boolean setRecordTriggerToServerSide) {
+    public final MSimpleSpeechRecognitionServer createServer(MISpeechRecognitionManager recognitionManager, boolean setRecordTriggerToServerSide, boolean shutdownOnPossibleSecurityRisk) {
         try {
             gui.getResetButton().startClickAnimation("Waiting for Client...");
             if (server != null) server.stop();
@@ -42,7 +42,7 @@ public class MSimpleSpeechServerCreator {
                     });
                 }
             });
-            server.start();
+            server.start(shutdownOnPossibleSecurityRisk);
             //gui.getServerPanel().logArea.setSelection(gui.getServerPanel().logArea.getText().length());
         } catch (Exception exc) {
             try{gui.getLogArea().append(exc.getMessage() + "\n");} catch(Exception exc2) {exc2.printStackTrace();}
