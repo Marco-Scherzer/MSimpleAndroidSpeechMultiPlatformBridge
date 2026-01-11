@@ -33,7 +33,6 @@ public final class MSimpleSpeechBackendServer {
     private final ExecutorService serverLoop = Executors.newSingleThreadExecutor();
     private volatile boolean canceled;
 
-    private final ExecutorService pollingThread = Executors.newSingleThreadExecutor();
     /**
      * @version 0.0.1
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -81,6 +80,7 @@ public final class MSimpleSpeechBackendServer {
         serverSocket = (SSLServerSocket) factory.createServerSocket(port);
         out.println("Server initialized on port " + port);
     }
+
 
     /**
      * @version 0.0.2 ,  raw SSL-Sockets
@@ -142,11 +142,13 @@ public final class MSimpleSpeechBackendServer {
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final void startRecordEvent(){
-        hasEvent = true;
-        if (recordEventTrigger != null) {
-            recordEventTrigger.complete(null);
-        }
+    public final void startRecordEvent() throws UnsupportedOperationException{
+        if( mode == RECORD_TRIGGER_LOCATION_MODE.RECORD_ONLY_ON_SERVERSIDE_EVENT) {
+            hasEvent = true;
+            if (recordEventTrigger != null) {
+                recordEventTrigger.complete(null);
+            }
+        } else throw new UnsupportedOperationException("Error: Calling startRecordEvent() is only supported in mode RECORD_ONLY_ON_SERVERSIDE_EVENT. Use setMode(..) to change mode.");
     }
 
     /**
