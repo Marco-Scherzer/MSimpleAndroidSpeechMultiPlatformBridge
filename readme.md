@@ -60,6 +60,8 @@ Establishing a new connection after a case of unauthenticated use forces the use
 
 3. Protocol-Mode shutdownOnPossibleSecurityRisk:  
    If shutdownOnPossibleSecurityRisk protocol‑mode is activated and the authenticated client cannot connect, or a client with a wrong ID or endpoint tries to connect, the server is, for security reasons, shut down immediately and has to be restarted actively by the user (e.g., by pressing a button), and the pairing with the client has to be renewed.
+
+4. The TokenCreator-Interface ( MITokenCreator ) makes it possible to create and validate all in my protocol used (above named) tokens via custom implementable algorithms (on the server as well as on the client side). 
 ---
 
 
