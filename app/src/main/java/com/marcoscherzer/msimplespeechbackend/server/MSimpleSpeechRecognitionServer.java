@@ -3,6 +3,7 @@ package com.marcoscherzer.msimplespeechbackend.server;
 import android.content.Context;
 
 import com.marcoscherzer.msimplespeechbackend.R;
+import com.marcoscherzer.msimplespeechbackend.server.myownpairingprotocolserver.MSimplePairingProtocolServer;
 
 import java.io.InputStream;
 import java.io.PrintStream;

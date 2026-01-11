@@ -1,8 +1,11 @@
-package com.marcoscherzer.msimplespeechbackend.server;
+package com.marcoscherzer.msimplespeechbackend.server.gui;
 
 import android.os.Handler;
 import android.os.Looper;
-import com.marcoscherzer.msimplespeechbackend.server.gui.MServerPanel;
+
+import com.marcoscherzer.msimplespeechbackend.server.MISpeechRecognitionManager;
+import com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechRecognitionServer;
+import com.marcoscherzer.msimplespeechbackend.server.myownpairingprotocolserver.MUUIDTokenCreator;
 import com.marcoscherzer.msimplespeechbackend.util.gui.MSimpleConsole2TextAreaRedirector;
 
 /**

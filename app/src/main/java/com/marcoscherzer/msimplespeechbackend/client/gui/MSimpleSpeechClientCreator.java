@@ -1,22 +1,13 @@
-package com.marcoscherzer.msimplespeechbackend.client;
+package com.marcoscherzer.msimplespeechbackend.client.gui;
 
 
-import android.content.Context;
-
-import com.marcoscherzer.msimplespeechbackend.R;
-import com.marcoscherzer.msimplespeechbackend.client.gui.MClientPanel;
+import com.marcoscherzer.msimplespeechbackend.client.MSimpleSpeechClient;
 import com.marcoscherzer.msimplespeechbackend.util.MRunnable1P;
 
-import java.io.InputStream;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
-import com.marcoscherzer.msimplespeechbackend.R;
-import com.marcoscherzer.msimplespeechbackend.util.MRunnable1P;
+
 import com.marcoscherzer.msimplespeechbackend.util.gui.MSimpleConsole2TextAreaRedirector;
 
-import java.io.InputStream;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
 /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */

@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplespeechbackend.server;
+package com.marcoscherzer.msimplespeechbackend.server.myownpairingprotocolserver;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,7 +28,7 @@ public final class MMaxLineLengthBufferedReader extends BufferedReader {
      * Reads a line safely with a maximum length limit.
      * Prevents DoS attacks via extremely long lines.
      */
-    public String readLine(int maxLineLength) throws IOException {
+    public final String readLine(int maxLineLength) throws IOException {
         StringBuilder sb = new StringBuilder();
         int c;
 

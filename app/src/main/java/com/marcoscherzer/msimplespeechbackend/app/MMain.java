@@ -10,13 +10,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.marcoscherzer.msimplespeechbackend.R;
-import com.marcoscherzer.msimplespeechbackend.client.MSimpleSpeechClientCreator;
+import com.marcoscherzer.msimplespeechbackend.client.gui.MSimpleSpeechClientCreator;
 import com.marcoscherzer.msimplespeechbackend.server.MISpeechRecognitionManager;
-import com.marcoscherzer.msimplespeechbackend.server.MIntentBasedSpeechRecognitionManager;
-import com.marcoscherzer.msimplespeechbackend.server.MSimplePairingProtocolServer;
+import com.marcoscherzer.msimplespeechbackend.server.MIntentBasedSpeechRecognitionManager1;
+import com.marcoscherzer.msimplespeechbackend.server.myownpairingprotocolserver.MSimplePairingProtocolServer;
 import com.marcoscherzer.msimplespeechbackend.client.MSimpleSpeechClient;
 import com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechRecognitionServer;
-import com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechRecognitionServerCreator;
+import com.marcoscherzer.msimplespeechbackend.server.gui.MSimpleSpeechRecognitionServerCreator;
 
 import java.io.InputStream;
 import java.security.cert.Certificate;
@@ -77,7 +77,7 @@ public final class MMain extends AppCompatActivity {
            }
 
            //speechRecognitionManager = new MSpeechRecognitionManager(this);
-           speechRecognitionManager = new MIntentBasedSpeechRecognitionManager(this);
+           speechRecognitionManager = new MIntentBasedSpeechRecognitionManager1(this);
            gui.getServerPanel().getResetButton().setOnClickListener(v -> {
                server = serverCreator.createServer( speechRecognitionManager, setRecordTriggerToServerSide , shutdownOnPossibleSecurityRisk);
            });

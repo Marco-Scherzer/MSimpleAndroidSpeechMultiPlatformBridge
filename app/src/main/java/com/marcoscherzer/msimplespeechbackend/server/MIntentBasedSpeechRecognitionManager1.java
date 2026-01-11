@@ -1,6 +1,5 @@
 package com.marcoscherzer.msimplespeechbackend.server;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.speech.RecognizerIntent;
 
@@ -11,7 +10,7 @@ import java.util.concurrent.CountDownLatch;
  *@version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  * Startet den Google-Sprachdialog
  */
-public final class MIntentBasedSpeechRecognitionManager extends MISpeechRecognitionManager{
+public final class MIntentBasedSpeechRecognitionManager1 extends MISpeechRecognitionManager{
 
     private static final int REQ_CODE_SPEECH_INPUT = 1001;
 
@@ -23,7 +22,7 @@ public final class MIntentBasedSpeechRecognitionManager extends MISpeechRecognit
      *@version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      * Startet den Google-Sprachdialog
      */
-    public MIntentBasedSpeechRecognitionManager(Activity context) {
+    public MIntentBasedSpeechRecognitionManager1(Activity context) {
         this.activity = context;
     }
 

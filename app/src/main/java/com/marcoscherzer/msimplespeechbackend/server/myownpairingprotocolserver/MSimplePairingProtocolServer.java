@@ -1,4 +1,4 @@
-package com.marcoscherzer.msimplespeechbackend.server;
+package com.marcoscherzer.msimplespeechbackend.server.myownpairingprotocolserver;
 
 import java.io.*;
 import java.net.Socket;
