@@ -77,7 +77,7 @@ public final class MMain extends AppCompatActivity {
            speechRecognitionManager = new MIntentBasedSpeechRecognitionManager(this);
            gui.getServerPanel().getResetButton().setOnClickListener(v -> {
                server = serverCreator.createServer( speechRecognitionManager );
-               server.setRecordTriggerToServerSideRecordTrigger(true);
+               server.setRecordTriggerToServerSideRecordTrigger(false);
            });
 
            gui.getClientPanel().getRecordButton().setEnabled(false);

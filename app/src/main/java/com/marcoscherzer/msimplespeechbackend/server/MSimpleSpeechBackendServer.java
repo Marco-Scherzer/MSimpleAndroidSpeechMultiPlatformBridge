@@ -126,7 +126,7 @@ public final class MSimpleSpeechBackendServer {
     /**
      * @version 0.0.2 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public enum RECORD_TRIGGER_LOCATION_MODE{
+    private enum RECORD_TRIGGER_LOCATION_MODE{
         RECORD_ONLY_ON_SERVERSIDE_EVENT,  //z.B headsetbutton
         RECORD_ALWAYS_ON_REQUEST; //z.B client-side softwarebutton
     }
@@ -140,6 +140,9 @@ public final class MSimpleSpeechBackendServer {
     /**
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * true   RECORD_ONLY_ON_SERVERSIDE_EVENT,  z.B headsetbutton
+     * false  RECORD_ALWAYS_ON_REQUEST,  z.B client-side softwarebutton
+     * default true RECORD_ALWAYS_ON_REQUEST,  z.B client-side softwarebutton
      */
     public final void setRecordTriggerToServerSideRecordTrigger(boolean recordTriggerIsAtServerSideOrNot){
         mode = recordTriggerIsAtServerSideOrNot ? RECORD_TRIGGER_LOCATION_MODE.RECORD_ONLY_ON_SERVERSIDE_EVENT : RECORD_TRIGGER_LOCATION_MODE.RECORD_ALWAYS_ON_REQUEST;
