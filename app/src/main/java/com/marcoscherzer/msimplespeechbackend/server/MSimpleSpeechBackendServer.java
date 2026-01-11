@@ -154,7 +154,9 @@ public final class MSimpleSpeechBackendServer {
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final void startRecordEventAndSendResultToClient() throws UnsupportedOperationException{
+        System.out.println("startRecordEventAndSendResultToClient()");//dbg
         if( mode == RECORD_TRIGGER_LOCATION_MODE.RECORD_ONLY_ON_SERVERSIDE_EVENT) {
+            System.out.println("(mode == RECORD_TRIGGER_LOCATION_MODE.RECORD_ONLY_ON_SERVERSIDE_EVENT)");//dbg
             hasEvent = true;
             if (recordEventTrigger != null) {
                 recordEventTrigger.complete(null);

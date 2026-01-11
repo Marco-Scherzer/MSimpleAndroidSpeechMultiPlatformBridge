@@ -110,19 +110,22 @@ public final class MMain extends AppCompatActivity {
 
     /**
      * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+    server side record button dbg
      */
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {  //server side record button dbg
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) { //easy server side record button dbg via Volume Key
             System.out.println("VOLUME UP pressed → triggering speech job");
             if(client.isReady()) {
-               // System.out.println(MMain.get().getServer().getClientInformation());//dbg
-                if (server != null) server.startRecordEventAndSendResultToClient();
+                System.out.println("client is ready");//dbg
+                if (server != null) {
+                    try{ server.startRecordEventAndSendResultToClient(); }
+                    catch (UnsupportedOperationException exc) { System.out.println(exc); }
+                }
             }
             return true;
         }
-
-        return super.onKeyDown(keyCode, event);
+        return true; // super.onKeyDown(keyCode, event);
     }
 
 
