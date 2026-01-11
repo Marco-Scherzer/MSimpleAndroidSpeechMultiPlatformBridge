@@ -53,6 +53,8 @@ public final class MSimpleSpeechClient {
         recordingJobStarted,
         recordingJobFinished
     }
+
+
     /**
      * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */

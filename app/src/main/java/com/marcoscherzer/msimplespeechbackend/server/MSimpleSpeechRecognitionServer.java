@@ -105,6 +105,7 @@ public class  MSimpleSpeechRecognitionServer extends MSimplePairingProtocolServe
     protected final void handlePayload(Socket socket, PrintWriter writer) throws SocketException, ExecutionException, InterruptedException {
         //Speech Recognition
         String results;
+        System.out.println("handlePayload() mode= "+mode);//dbg
         switch (mode) {
             case RECORD_ONLY_ON_SERVERSIDE_EVENT:
 

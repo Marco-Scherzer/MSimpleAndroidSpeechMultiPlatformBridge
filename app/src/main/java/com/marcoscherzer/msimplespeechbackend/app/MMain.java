@@ -1,5 +1,7 @@
 package com.marcoscherzer.msimplespeechbackend.app;
 
+import static com.marcoscherzer.msimplespeechbackend.client.MSimpleSpeechClient.State.firstConnectionJobFinished;
+
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -37,7 +39,7 @@ public final class MMain extends AppCompatActivity {
     MSimpleSpeechClientCreator clientCreator;
     MSimpleSpeechRecognitionServerCreator serverCreator;
     private Certificate ca;
-    private final boolean setRecordTriggerToServerSide = false;
+    private final boolean setRecordTriggerToServerSide = true;
 
     private final boolean shutdownOnPossibleSecurityRisk = false;
     /**
@@ -93,10 +95,7 @@ public final class MMain extends AppCompatActivity {
                client.submitFirstConnectionJob();
            });
            gui.getClientPanel().getRecordButton().setOnClickListener(v -> {
-               //MSimpleSpeechClient.State state = client.getState();
-               //if (state == MSimpleSpeechClient.State.recordingJobFinished) {
                if(client.isReady()) client.submitRecordJob();
-               //}
            });
        }catch(Exception exc){
             exc.printStackTrace();
@@ -119,13 +118,11 @@ public final class MMain extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {  //server side record button dbg
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) { //easy server side record button dbg via Volume Key
             System.out.println("VOLUME UP pressed → triggering speech job");
-            if(client.isReady()) {
                 System.out.println("client is ready");//dbg
                 if (server != null) {
                     try{ server.startRecordEventAndSendResultToClient(); }
                     catch (UnsupportedOperationException exc) { System.out.println(exc); }
                 }
-            }
             return true;
         }
         return true; // super.onKeyDown(keyCode, event);
