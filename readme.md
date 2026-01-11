@@ -51,12 +51,15 @@
 
 
 **Features:**
-- Once a client was connected for the first time, the server blocks any other (unknown) client that has another ID.
-- One‑time usable endpoints make it impossible to reuse the current prepared endpoint.
-  If an unauthenticated client steals the ID and uses the current endpoint, the authenticated client cannot use the endpoint anymore and so cannot connect. This indicates unauthenticated use (and can optionally trigger an alarm on the client-side as well as on the server-side).
-  Establishing a new connection after a case of unauthenticated use forces the user to actively restart the pairing (handshake) process on the server (e.g., by pressing a button) to reconnect and so to prevent unauthorized access.
-- Protocol-Mode shutdownOnPossibleSecurityRisk: If shutdownOnPossibleSecurityRisk protocol-mode is activated and the authenticated client cannot connect, or a client with a wrong id or endpoint tried to connect, the server is for security reasons shutdown immediatly an has to be restartet actively by the user (e.g., by pressing a button) and then the pairing with the client has to be renewed.
+1. Once a client was connected for the first time, the server blocks any other (unknown) client that has another ID.
 
+2. One‑time usable endpoints make it impossible to reuse the current prepared endpoint.  
+If an unauthenticated client steals the ID and uses the current endpoint-token, the authenticated client cannot use the endpoint anymore and so cannot connect.
+This indicates unauthenticated use (and can optionally trigger an alarm on the client-side as well as on the server-side).
+Establishing a new connection after a case of unauthenticated use forces the user to actively restart the pairing (handshake) process on the server (e.g., by pressing a button) to reconnect and so to prevent unauthorized access.
+
+3. Protocol-Mode shutdownOnPossibleSecurityRisk:  
+If shutdownOnPossibleSecurityRisk protocol-mode is activated and the authenticated client cannot connect, or a client with a wrong ID or endpoint tried to connect, the server is for security reasons shut down immediately and has to be restarted actively by the user (e.g., by pressing a button) and the pairing with the client has to be renewed.
 ---
 
 
