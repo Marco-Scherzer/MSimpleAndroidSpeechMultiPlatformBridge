@@ -1,9 +1,6 @@
 package com.marcoscherzer.msimplespeechbackend.client;
 
-import static com.marcoscherzer.msimplespeechbackend.client.MSimpleSpeechClient.RECORD_TRIGGER_LOCATION_MODE.SERVERSIDE_CONNECTED_RECORDBUTTON;
-
 import com.marcoscherzer.msimplespeechbackend.util.MRunnable1P;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -109,16 +106,7 @@ public final class MSimpleSpeechClient {
         this.onFirstConnectionJobStartHandler = handler;
     }
 
-    /**
-     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public static enum RECORD_TRIGGER_LOCATION_MODE{
-        SERVERSIDE_CONNECTED_RECORDBUTTON,  //z.B headsetbutton
-        CLIENTSIDE_CONNECTED_RECORDBUTTON; //z.B client-side softwarebutton
-    }
 
-//21:26 //21:28
-    private RECORD_TRIGGER_LOCATION_MODE  recordTriggerLocationMode = SERVERSIDE_CONNECTED_RECORDBUTTON; //dbg
     /**
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved

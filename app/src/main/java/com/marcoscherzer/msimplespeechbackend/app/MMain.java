@@ -1,8 +1,6 @@
 package com.marcoscherzer.msimplespeechbackend.app;
 
 import android.Manifest;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -18,7 +16,6 @@ import com.marcoscherzer.msimplespeechbackend.server.MIntentBasedSpeechRecogniti
 import com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechBackendServer;
 import com.marcoscherzer.msimplespeechbackend.client.MSimpleSpeechClient;
 import com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechServerCreator;
-import com.marcoscherzer.msimplespeechbackend.server.MSpeechRecognitionManager;
 
 import java.io.InputStream;
 import java.security.cert.Certificate;
@@ -80,6 +77,7 @@ public final class MMain extends AppCompatActivity {
            speechRecognitionManager = new MIntentBasedSpeechRecognitionManager(this);
            gui.getServerPanel().getResetButton().setOnClickListener(v -> {
                server = serverCreator.createServer( speechRecognitionManager );
+               server.setRecordTriggerToServerSideRecordTrigger(true);
            });
 
            gui.getClientPanel().getRecordButton().setEnabled(false);
@@ -115,11 +113,11 @@ public final class MMain extends AppCompatActivity {
      * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
+    public boolean onKeyDown(int keyCode, KeyEvent event) {  //server side record button dbg
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
             System.out.println("VOLUME UP pressed → triggering speech job");
             if(client.isReady()) {
-               // System.out.println(MMain.get().getServer().getClientInformation());//dbg, später unnötig wenn client separiert
+               // System.out.println(MMain.get().getServer().getClientInformation());//dbg
                 client.submitRecordJob();
             }
             return true;

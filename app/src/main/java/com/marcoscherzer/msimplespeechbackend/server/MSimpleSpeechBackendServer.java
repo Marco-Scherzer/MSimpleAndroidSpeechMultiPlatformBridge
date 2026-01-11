@@ -124,18 +124,26 @@ public final class MSimpleSpeechBackendServer {
     }
 
     /**
-     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     * @version 0.0.2 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public static enum RECORD_TRIGGER_LOCATION_MODE{
+    public enum RECORD_TRIGGER_LOCATION_MODE{
         RECORD_ONLY_ON_SERVERSIDE_EVENT,  //z.B headsetbutton
         RECORD_ALWAYS_ON_REQUEST; //z.B client-side softwarebutton
     }
 
-    private RECORD_TRIGGER_LOCATION_MODE mode;
+    private RECORD_TRIGGER_LOCATION_MODE mode = RECORD_TRIGGER_LOCATION_MODE.RECORD_ALWAYS_ON_REQUEST;
 
     private CompletableFuture<Void> recordEventTrigger;
 
     private volatile boolean hasEvent = false;
+
+    /**
+     * @version 0.0.2 ,  raw SSL-Sockets
+     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final void setRecordTriggerToServerSideRecordTrigger(boolean recordTriggerIsAtServerSideOrNot){
+        mode = recordTriggerIsAtServerSideOrNot ? RECORD_TRIGGER_LOCATION_MODE.RECORD_ONLY_ON_SERVERSIDE_EVENT : RECORD_TRIGGER_LOCATION_MODE.RECORD_ALWAYS_ON_REQUEST;
+    }
 
 
     /**
@@ -148,7 +156,7 @@ public final class MSimpleSpeechBackendServer {
             if (recordEventTrigger != null) {
                 recordEventTrigger.complete(null);
             }
-        } else throw new UnsupportedOperationException("Error: Calling startRecordEvent() is only supported in mode RECORD_ONLY_ON_SERVERSIDE_EVENT. Use setMode(..) to change mode.");
+        } else throw new UnsupportedOperationException("Error: Calling startRecordEvent() is only supported for mode RECORD_ONLY_ON_SERVERSIDE_EVENT. Use setMode(..) to change mode.");
     }
 
     /**
@@ -160,7 +168,7 @@ public final class MSimpleSpeechBackendServer {
             MMaxLineLengthBufferedReader reader = null;
             PrintWriter writer = null;
             try {
-                socket.setSoTimeout(3000);//initialtimeout vor upgrade
+                socket.setSoTimeout(3000);
                 reader = new MMaxLineLengthBufferedReader(new InputStreamReader(socket.getInputStream()));
                 writer = new PrintWriter(socket.getOutputStream(), true);
 
@@ -214,7 +222,7 @@ public final class MSimpleSpeechBackendServer {
                     String results;
                     clientInformation.nextRecordEndpoint = UUID.randomUUID().toString();
                     writer.println(clientInformation.nextRecordEndpoint);
-                    if (isPaired()) {
+                    if (isPaired()) { //!clientInformation.nextRecordEndpoint.equals(INITIALIZE_UUID);
                                 System.out.println("polling and waiting for recordEvent");
                                 switch (mode) {
                                     case RECORD_ONLY_ON_SERVERSIDE_EVENT:
