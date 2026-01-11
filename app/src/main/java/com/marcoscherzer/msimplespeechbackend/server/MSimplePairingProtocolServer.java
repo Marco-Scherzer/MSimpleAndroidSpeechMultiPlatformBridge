@@ -2,13 +2,10 @@ package com.marcoscherzer.msimplespeechbackend.server;
 
 import java.io.*;
 import java.net.Socket;
-import java.security.KeyStore;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import android.content.Context;
-import com.marcoscherzer.msimplespeechbackend.R;
 
-import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -41,9 +38,9 @@ Establishing a new connection after a case of unauthenticated use forces the use
 If shutdownOnPossibleSecurityRisk protocol‑mode is activated and the authenticated client cannot connect, or a client with a wrong ID or endpoint tries to connect, the server is, for security reasons, shut down immediately and has to be restarted actively by the user (e.g., by pressing a button), and the pairing with the client has to be renewed.
 ---
  */
-public abstract class MSimplePairingProtocolServer<TokenT> {
+public abstract class MSimplePairingProtocolServer {
 
-    private final MITokenCreator<TokenT> tokenCreator;
+    private MITokenCreator tokenCreator;
     public PrintStream out;
     private final SSLServerSocket serverSocket;
     private final ExecutorService serverLoop = Executors.newSingleThreadExecutor();
@@ -103,9 +100,8 @@ public abstract class MSimplePairingProtocolServer<TokenT> {
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimplePairingProtocolServer(int port, MITokenCreator<TokenT> tokenCreator, Context context, PrintStream out) throws Exception {
+    public MSimplePairingProtocolServer(int port,  Context context, PrintStream out) throws Exception {
         this.out = out;
-        this.tokenCreator = tokenCreator;
         out.println("Initializing server...");
         SSLContext sslContext = createSSLContext(context);
         SSLServerSocketFactory factory = sslContext.getServerSocketFactory();
@@ -118,28 +114,18 @@ public abstract class MSimplePairingProtocolServer<TokenT> {
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    private SSLContext createSSLContext(Context context) throws Exception {
-        out.println("Initializing SSL configuration...");
-        KeyStore keyStore = KeyStore.getInstance("PKCS12");
-        try (InputStream keystoreStream = context.getResources().openRawResource(R.raw.keystore)) {
-            keyStore.load(keystoreStream, "testtest".toCharArray());
-            out.println("Keystore successfully loaded.");
-        }
-        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        kmf.init(keyStore, "testtest".toCharArray());
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init(kmf.getKeyManagers(), null, null);
-        return sslContext;
-    }
+    protected abstract SSLContext createSSLContext(Context context) throws Exception;
+
 
     /**
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final void start(boolean shutdownOnPossibleSecurityRisk) {
+    public final void start(MITokenCreator tokenCreator, boolean shutdownOnPossibleSecurityRisk) {
         out.println("Starting server...");
+        this.tokenCreator = tokenCreator;
         this.shutdownOnPossibleSecurityRisk = shutdownOnPossibleSecurityRisk;
-        clientInformation = new MClientInformation("initialize", null, null);
+        clientInformation = new MClientInformation(tokenCreator.getInitialToken(), null, null);
         serverLoop.submit(() -> {
             while (!canceled) {
                 try {
@@ -194,20 +180,20 @@ public abstract class MSimplePairingProtocolServer<TokenT> {
                 }
 
                 // Registrierung ( z.B. connect Button )
-                if (requestEndpoint.equals(tokenCreator.getInitialToken()) && clientInformation.registeredClientId == null) {
+                if (tokenCreator.validate(requestEndpoint,tokenCreator.getInitialToken()) && clientInformation.registeredClientId == null) {
                     clientInformation.registeredClientId = incomingClientId;
                     clientInformation.ip = socket.getInetAddress().getHostAddress();
                     out.println("Registered new client ID = \"" + incomingClientId + "\"");
 
                     if (onPairHandler != null) { onPairHandler.run();}
 
-                    clientInformation.setNextEndpoint(tokenCreator.createNewToken().toString());
+                    clientInformation.setNextEndpoint(tokenCreator.createNewToken());
 
                     writer.println(clientInformation.nextEndpoint);
                     writer.println("Paired successfully");
                     return;
 
-                } else if (!incomingClientId.equals(clientInformation.registeredClientId)) {
+                } else if (!tokenCreator.validate(incomingClientId, clientInformation.registeredClientId)) {
                     writer.println("error");
                     writer.println("Unknown client");
                     if(shutdownOnPossibleSecurityRisk) stop();
@@ -215,8 +201,8 @@ public abstract class MSimplePairingProtocolServer<TokenT> {
                     return;
                 }
                 if (isPaired()) { //!clientInformation.nextRecordEndpoint.equals(INITIALIZE_UUID);
-                    if (clientInformation.nextEndpoint.equals(requestEndpoint)) {
-                        clientInformation.setNextEndpoint(tokenCreator.createNewToken().toString());
+                    if (tokenCreator.validate(clientInformation.nextEndpoint,requestEndpoint)) {
+                        clientInformation.setNextEndpoint(tokenCreator.createNewToken());
                         writer.println(clientInformation.nextEndpoint);
 //---------------------------------------------- Payload Creation (pairing protocol independent) ------------------------------------
                         handlePayload(socket, writer);
@@ -243,7 +229,7 @@ public abstract class MSimplePairingProtocolServer<TokenT> {
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public abstract void handlePayload(Socket socket, PrintWriter writer) throws Exception;
+    protected abstract void handlePayload(Socket socket, PrintWriter writer) throws Exception;
 
     /**
      * @version 0.0.2 ,  raw SSL-Sockets

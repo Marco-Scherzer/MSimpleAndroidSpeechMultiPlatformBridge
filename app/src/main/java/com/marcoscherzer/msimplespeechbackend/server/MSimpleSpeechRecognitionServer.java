@@ -1,14 +1,22 @@
 package com.marcoscherzer.msimplespeechbackend.server;
 
 import android.content.Context;
+
+import com.marcoscherzer.msimplespeechbackend.R;
+
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
+import java.security.KeyStore;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
 
 /**
  * 11.01.2026 14:08
@@ -40,7 +48,7 @@ public class  MSimpleSpeechRecognitionServer extends MSimplePairingProtocolServe
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public MSimpleSpeechRecognitionServer(int port, MISpeechRecognitionManager recognitionManager, Context context, PrintStream out) throws Exception {
-        super(port,new MUUIDTokenCreator(), context, out);
+        super(port, context, out);
         this.recognizer = recognitionManager;
     }
 
@@ -55,6 +63,24 @@ public class  MSimpleSpeechRecognitionServer extends MSimplePairingProtocolServe
         mode = setRecordTriggerToServerSide ? RECORD_TRIGGER_LOCATION_MODE.RECORD_ONLY_ON_SERVERSIDE_EVENT : RECORD_TRIGGER_LOCATION_MODE.RECORD_ALWAYS_ON_REQUEST;
     }
 
+    /**
+     * @version 0.0.1 ,  raw SSL-Sockets
+     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    protected final SSLContext createSSLContext(Context context) throws Exception{
+        out.println("Initializing SSL configuration...");
+        KeyStore keyStore = KeyStore.getInstance("PKCS12");
+        try (
+                InputStream keystoreStream = context.getResources().openRawResource(R.raw.keystore)) {
+            keyStore.load(keystoreStream, "testtest".toCharArray());
+            out.println("Keystore successfully loaded.");
+        }
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        kmf.init(keyStore, "testtest".toCharArray());
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(kmf.getKeyManagers(), null, null);
+        return sslContext;
+    }
 
     /**
      * @version 0.0.2 ,  raw SSL-Sockets
@@ -75,7 +101,7 @@ public class  MSimpleSpeechRecognitionServer extends MSimplePairingProtocolServe
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public final void handlePayload(Socket socket, PrintWriter writer) throws SocketException, ExecutionException, InterruptedException {
+    protected final void handlePayload(Socket socket, PrintWriter writer) throws SocketException, ExecutionException, InterruptedException {
         //Speech Recognition
         String results;
         switch (mode) {

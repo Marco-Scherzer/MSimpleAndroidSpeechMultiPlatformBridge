@@ -28,7 +28,7 @@ public class MSimpleSpeechServerCreator {
         try {
             gui.getResetButton().startClickAnimation("Waiting for Client...");
             if (server != null) server.stop();
-            server = new MSimpleSpeechRecognitionServer(8443, recognitionManager, gui.getLayout().getContext(),new MSimpleConsole2TextAreaRedirector(gui.getLogArea()));
+            server = new MSimpleSpeechRecognitionServer(8443, recognitionManager, gui.getLayout().getContext(), System.out);
             server.setRecordTriggerToServerSide(setRecordTriggerToServerSide);
             server.setOnPair(new Runnable() {
                 @Override
@@ -42,7 +42,7 @@ public class MSimpleSpeechServerCreator {
                     });
                 }
             });
-            server.start(shutdownOnPossibleSecurityRisk);
+            server.start(new MUUIDTokenCreator(),shutdownOnPossibleSecurityRisk);
             //gui.getServerPanel().logArea.setSelection(gui.getServerPanel().logArea.getText().length());
         } catch (Exception exc) {
             try{gui.getLogArea().append(exc.getMessage() + "\n");} catch(Exception exc2) {exc2.printStackTrace();}
