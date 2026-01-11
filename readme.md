@@ -41,20 +41,19 @@
 ### Handshake
 - **Step 0:** The user has to start the pairing handshake process on the server (e.g., by pressing a button)
 - **Step 1:** The client registers with ID at the server.
-- **Step 2:** The server answers with a one‑way endpoint for the next request.
-
-**Feature A:**  
-Once a client was connected for the first time, the server blocks any other (unknown) client that has another ID.
-
+- **Step 2:** The server answers with a one time usable endpoint for the next request.
 
 
 ### Content Transmission
-- **Step 1:** The client requests the next content by using this one‑way endpoint.
-- **Step 2:** The server sends the content plus the next one‑way endpoint … and so on (1,2, 1,2, …)
+- **Step 1:** The client requests the next content by using this one-time usable endpoint.
+- **Step 2:** The server sends the content plus the next one‑time usable endpoint … and so on (1,2, 1,2, …)
 
-**Feature B:**
-- One‑way endpoints make it impossible to reuse the current prepared endpoint.
-- If an unauthenticated client steals the ID and uses the current endpoint, the authenticated client cannot use the endpoint anymore. This indicates unauthenticated use (and can optionally trigger an alarm on the client-side as well as on the server-side).
+
+
+**Features:**
+- Once a client was connected for the first time, the server blocks any other (unknown) client that has another ID.
+- One‑time usable endpoints make it impossible to reuse the current prepared endpoint.
+  If an unauthenticated client steals the ID and uses the current endpoint, the authenticated client cannot use the endpoint anymore. This indicates unauthenticated use (and can optionally trigger an alarm on the client-side as well as on the server-side).
 - Protocol-Mode shutdownOnPossibleSecurityRisk: If shutdownOnPossibleSecurityRisk protocol-mode is activated and the authenticated client cannot connect, the server is for security reasons shutdown immediatly an has to be restartet actively by the user (e.g., by pressing a button) and the pairing with the client has to be renewed.
 - Establishing a new connection after a case of unauthenticated use forces the user actively to restart the pairing (handshake) process on the server (e.g., by pressing a button) to prevent unauthorized access.
 
