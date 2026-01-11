@@ -154,6 +154,7 @@ public final class MSimpleSpeechBackendServer {
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     private void handleClient(Socket socket) {
+        //---------------------------------------------- My own Pairing Protocol ------------------------------------
             MMaxLineLengthBufferedReader reader = null;
             PrintWriter writer = null;
             try {
@@ -205,6 +206,7 @@ public final class MSimpleSpeechBackendServer {
                     return;
                 }
 
+ //---------------------------------------------- Create Payload (pairing protocol independent) ------------------------------------
                 // Speech Recognition
                 if (clientInformation.nextRecordEndpoint.equals(requestEndpoint)) {
                     String results;
