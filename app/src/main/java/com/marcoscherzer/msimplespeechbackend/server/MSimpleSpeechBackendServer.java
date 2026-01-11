@@ -2,9 +2,11 @@ package com.marcoscherzer.msimplespeechbackend.server;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
 import java.security.KeyStore;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -42,20 +44,20 @@ public final class MSimpleSpeechBackendServer {
          * @version 0.0.1
          * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          */
-        MClientInformation(String nextRecordEndpoint, String ip, String registeredClientId) {
-            this.nextRecordEndpoint = nextRecordEndpoint;
+        MClientInformation(String nextEndpoint, String ip, String registeredClientId) {
+            this.nextEndpoint = nextEndpoint;
             this.ip = ip;
             this.registeredClientId = registeredClientId;
         }
 
-        private String nextRecordEndpoint;
+        private String nextEndpoint;
         private String ip;
         private String registeredClientId;
 
         @Override
         public final String toString() {
             return "MClientInformation{" +
-                    "nextRecordEndpoint='" + nextRecordEndpoint + '\'' +
+                    "nextRecordEndpoint='" + nextEndpoint + '\'' +
                     ", ip='" + ip + '\'' +
                     ", registeredClientId='" + registeredClientId + '\'' +
                     '}';
@@ -168,6 +170,56 @@ public final class MSimpleSpeechBackendServer {
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
+    public final void handlePayload(Socket socket, PrintWriter writer) throws SocketException, ExecutionException, InterruptedException {
+        //Speech Recognition
+        String results;
+        clientInformation.nextEndpoint = UUID.randomUUID().toString();
+        writer.println(clientInformation.nextEndpoint);
+        switch (mode) {
+            case RECORD_ONLY_ON_SERVERSIDE_EVENT:
+
+                // Wenn ein Event gespeichert ist sofort starten
+                if (hasEvent) {
+                    System.out.println("working of recordEvent triggered during reconnection");
+                    hasEvent = false;//Event verbrauchen
+                    out.println("recordEvent (queued)");
+                    recognizer.startListening();
+                    results = recognizer.waitOnResults();
+                    writer.println(results);
+                    break;
+                }
+
+                System.out.println("polling and waiting for recordEvent");
+                recordEventTrigger = new CompletableFuture<Void>();
+                socket.setSoTimeout(30000);
+                try {
+                    recordEventTrigger.get(25000, TimeUnit.MILLISECONDS);
+                    hasEvent=false;
+                    System.out.println("recordEvent");
+                    out.println("Starting recognizer...");
+                    recognizer.startListening();
+                    results = recognizer.waitOnResults();
+                    out.println("Recognition complete.");
+                    writer.println(results);
+                } catch (TimeoutException exc) {
+                    System.out.println("Timeout: kein recordEvent, just polling new ");//
+                    writer.println("");
+                }
+                break;
+            case RECORD_ALWAYS_ON_REQUEST:
+                out.println("Starting recognizer...");
+                recognizer.startListening();
+                results = recognizer.waitOnResults();
+                out.println("Recognition complete.");
+                writer.println(results);
+                break;
+        }
+    }
+
+    /**
+     * @version 0.0.2 ,  raw SSL-Sockets
+     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
     private void handleClient(Socket socket) {
         //---------------------------------------------- My own Pairing Protocol ------------------------------------
             MMaxLineLengthBufferedReader reader = null;
@@ -205,13 +257,11 @@ public final class MSimpleSpeechBackendServer {
                     clientInformation.ip = socket.getInetAddress().getHostAddress();
                     out.println("Registered new client ID = \"" + incomingClientId + "\"");
 
-                    if (onPairHandler != null) {
-                        onPairHandler.run();
-                    }
+                    if (onPairHandler != null) { onPairHandler.run();}
 
-                    clientInformation.nextRecordEndpoint = UUID.randomUUID().toString();
+                    clientInformation.nextEndpoint = UUID.randomUUID().toString();
 
-                    writer.println(clientInformation.nextRecordEndpoint);
+                    writer.println(clientInformation.nextEndpoint);
                     writer.println("Paired successfully");
                     return;
 
@@ -221,54 +271,11 @@ public final class MSimpleSpeechBackendServer {
                     return;
                 }
                 if (isPaired()) { //!clientInformation.nextRecordEndpoint.equals(INITIALIZE_UUID);
-                    if (clientInformation.nextRecordEndpoint.equals(requestEndpoint)) {
+                    if (clientInformation.nextEndpoint.equals(requestEndpoint)) {
 
 //---------------------------------------------- Payload Creation (pairing protocol independent) ------------------------------------
-// Speech Recognition
-                        String results;
-                        clientInformation.nextRecordEndpoint = UUID.randomUUID().toString();
-                        writer.println(clientInformation.nextRecordEndpoint);
-                        switch (mode) {
-                            case RECORD_ONLY_ON_SERVERSIDE_EVENT:
-
-                                // Wenn ein Event gespeichert ist sofort starten
-                                if (hasEvent) {
-                                    System.out.println("working of recordEvent triggered during reconnection");
-                                    hasEvent = false;//Event verbrauchen
-                                    out.println("recordEvent (queued)");
-                                    recognizer.startListening();
-                                    results = recognizer.waitOnResults();
-                                    writer.println(results);
-                                    break;
-                                }
-
-                                System.out.println("polling and waiting for recordEvent");
-                                recordEventTrigger = new CompletableFuture<Void>();
-                                socket.setSoTimeout(30000);
-                                try {
-                                    recordEventTrigger.get(25000, TimeUnit.MILLISECONDS);
-                                    hasEvent=false;
-                                    System.out.println("recordEvent");
-                                    out.println("Starting recognizer...");
-                                    recognizer.startListening();
-                                    results = recognizer.waitOnResults();
-                                    out.println("Recognition complete.");
-                                    writer.println(results);
-                                } catch (TimeoutException exc) {
-                                    System.out.println("Timeout: kein recordEvent, just polling new ");//
-                                    writer.println("");
-                                }
-                                break;
-                            case RECORD_ALWAYS_ON_REQUEST:
-                                out.println("Starting recognizer...");
-                                recognizer.startListening();
-                                results = recognizer.waitOnResults();
-                                out.println("Recognition complete.");
-                                writer.println(results);
-                                break;
-                        }
+                     handlePayload(socket, writer);
 //---------------------------------------------- End of Payload creation (pairing protocol independent) ------------------------------------
-
 
                     } else {
                         writer.println("error");
@@ -302,7 +309,7 @@ public final class MSimpleSpeechBackendServer {
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final boolean isPaired() {
-        return !clientInformation.nextRecordEndpoint.equals(INITIALIZE_UUID);
+        return !clientInformation.nextEndpoint.equals(INITIALIZE_UUID);
     }
     /**
      * @version 0.0.1
