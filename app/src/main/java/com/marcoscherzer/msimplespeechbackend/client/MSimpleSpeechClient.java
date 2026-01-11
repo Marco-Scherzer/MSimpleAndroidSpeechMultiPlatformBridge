@@ -138,6 +138,7 @@ public final class MSimpleSpeechClient {
 
                 out.println("response = \"" + response + "\"");
                 response_out.append(response);
+
             }
         } catch (Exception exc) {
              out.println("Exception " + exc.getMessage());
@@ -153,22 +154,29 @@ public final class MSimpleSpeechClient {
         }
         return response;
     }
+
+
+    boolean poll = true;
     /**
      * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     private final Runnable recordJob = new Runnable() {
         public void run() {
-            state = State.recordingJobStarted;
-            if (onRecordJobStartHandler != null) onRecordJobStartHandler.run();
+            while(poll) {
+                state = State.recordingJobStarted;
+                if (onRecordJobStartHandler != null) onRecordJobStartHandler.run();
 
-            StringBuilder responseText_out = new StringBuilder();
-            doServerRequest(recordEndpoint, responseText_out);
+                StringBuilder responseText_out = new StringBuilder();
+                doServerRequest(recordEndpoint, responseText_out);
 
-            if (onRecordResponseHandler != null) onRecordResponseHandler.run(responseText_out.toString());
+                if (onRecordResponseHandler != null)
+                    onRecordResponseHandler.run(responseText_out.toString());
 
-            state = State.recordingJobFinished;
+                state = State.recordingJobFinished;
+            }
         }
     };
+
     /**
      * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
