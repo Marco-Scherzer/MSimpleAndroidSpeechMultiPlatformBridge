@@ -1,8 +1,5 @@
 package com.marcoscherzer.msimplespeechbackend.server;
 
-import static com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechBackendServer.RECORD_TRIGGER_LOCATION_MODE.CLIENTSIDE_CONNECTED_RECORDBUTTON;
-import static com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechBackendServer.RECORD_TRIGGER_LOCATION_MODE.SERVERSIDE_CONNECTED_RECORDBUTTON;
-
 import java.io.*;
 import java.net.Socket;
 import java.security.KeyStore;
@@ -130,8 +127,8 @@ public final class MSimpleSpeechBackendServer {
      * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public static enum RECORD_TRIGGER_LOCATION_MODE{
-        SERVERSIDE_CONNECTED_RECORDBUTTON,  //z.B headsetbutton
-        CLIENTSIDE_CONNECTED_RECORDBUTTON; //z.B client-side softwarebutton
+        RECORD_ONLY_ON_SERVERSIDE_EVENT,  //z.B headsetbutton
+        RECORD_ALWAYS_ON_REQUEST; //z.B client-side softwarebutton
     }
 
     private RECORD_TRIGGER_LOCATION_MODE mode;
@@ -202,7 +199,7 @@ public final class MSimpleSpeechBackendServer {
                     return;
                 }
 
-                // Speech Recognition ( server side record Button )
+                // Speech Recognition
                 if (clientInformation.nextRecordEndpoint.equals(requestEndpoint)) {
                     String results;
                     clientInformation.nextRecordEndpoint = UUID.randomUUID().toString();
@@ -210,7 +207,7 @@ public final class MSimpleSpeechBackendServer {
                     if (isPaired()) {
                                 System.out.println("polling and waiting for recordEvent");
                                 switch (mode) {
-                                    case SERVERSIDE_CONNECTED_RECORDBUTTON:
+                                    case RECORD_ONLY_ON_SERVERSIDE_EVENT:
                                         recordEventTrigger = new CompletableFuture<Void>();
                                         socket.setSoTimeout(30000);
                                         try {
@@ -226,7 +223,7 @@ public final class MSimpleSpeechBackendServer {
                                             writer.println("");
                                         }
                                         break;
-                                    case CLIENTSIDE_CONNECTED_RECORDBUTTON:
+                                    case RECORD_ALWAYS_ON_REQUEST:
                                         out.println("Starting recognizer...");
                                         recognizer.startListening();
                                         results = recognizer.waitOnResults();
