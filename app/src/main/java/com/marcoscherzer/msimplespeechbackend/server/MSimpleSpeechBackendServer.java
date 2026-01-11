@@ -4,8 +4,11 @@ import java.io.*;
 import java.net.Socket;
 import java.security.KeyStore;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import android.content.Context;
 
@@ -27,9 +30,10 @@ public final class MSimpleSpeechBackendServer {
     public PrintStream out;
 
     private SSLServerSocket serverSocket;
-    private final ExecutorService pool = Executors.newSingleThreadExecutor();
+    private final ExecutorService serverLoop = Executors.newSingleThreadExecutor();
     private volatile boolean canceled;
 
+    private final ExecutorService pollingThread = Executors.newSingleThreadExecutor();
     /**
      * @version 0.0.1
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -103,7 +107,7 @@ public final class MSimpleSpeechBackendServer {
     public final void start() {
         out.println("Starting server...");
         clientInformation = new MClientInformation("initialize", null, null);
-        pool.submit(() -> {
+        serverLoop.submit(() -> {
             while (!canceled) {
                 try {
                     out.println("listening for new connection...");
@@ -154,17 +158,6 @@ public final class MSimpleSpeechBackendServer {
                     return;
                 }
 
-                // Dritte Zeile: poll or not
-                String poll = reader.readLine(4);
-                if (poll != null) {
-                    poll = poll.trim();
-                    if(poll.equals("poll")) {
-                        out.println("poll: " + poll);
-                        //initialtimeout upgrade
-                    }
-
-                }
-
                 // Registrierung ( z.B. connect Button )
                 if (requestEndpoint.equals(INITIALIZE_UUID) && clientInformation.registeredClientId == null) {
                     clientInformation.registeredClientId = incomingClientId;
@@ -187,7 +180,35 @@ public final class MSimpleSpeechBackendServer {
                     return;
                 }
 
-                // Speech Recognition ( z.B. record Button )
+                // Speech Recognition ( server side record Button )
+                if (clientInformation.nextRecordEndpoint.equals(requestEndpoint)) {
+                    String results = "";
+                    clientInformation.nextRecordEndpoint = UUID.randomUUID().toString();
+                    writer.println(clientInformation.nextRecordEndpoint);
+                    if (isPaired()) {
+                            CompletableFuture<Void> recordEvent = new CompletableFuture<Void>();
+                            socket.setSoTimeout(30000);
+                            try {
+                                System.out.println("polling and waiting for recordEvent");
+                                recordEvent.get(25000, TimeUnit.MILLISECONDS);
+                                System.out.println("recordEvent");
+                                out.println("Starting recognizer...");
+                                recognizer.startListening();
+                                results = recognizer.waitOnResults();
+                                out.println("Recognition complete.");
+                                writer.println(results);
+                            } catch (TimeoutException exc) {
+                                System.out.println("Timeout: kein recordEvent, polling new ");//
+                                writer.println("");
+                            }
+                    }
+                } else {
+                    writer.println("error");
+                    writer.println("Unknown or expired endpoint");
+                }
+
+
+                // Speech Recognition ( client side record Button )
                 if (clientInformation.nextRecordEndpoint.equals(requestEndpoint)) {
                     String results = "";
                     if (isPaired()) {
@@ -221,7 +242,7 @@ public final class MSimpleSpeechBackendServer {
     public final void stop() {
         out.println("Stopping server...");
         canceled = true;
-        pool.shutdownNow();
+        serverLoop.shutdownNow();
         try {
             serverSocket.close();
         } catch (IOException ignored) {}

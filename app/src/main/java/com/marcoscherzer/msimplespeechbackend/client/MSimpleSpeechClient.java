@@ -117,7 +117,7 @@ public final class MSimpleSpeechClient {
         CLIENTSIDE_CONNECTED_RECORDBUTTON; //z.B client-side softwarebutton
     }
 
-//21:26
+//21:26 //21:28
     private RECORD_TRIGGER_LOCATION_MODE  recordTriggerLocationMode = SERVERSIDE_CONNECTED_RECORDBUTTON; //dbg
     /**
      * @version 0.0.2 ,  raw SSL-Sockets
