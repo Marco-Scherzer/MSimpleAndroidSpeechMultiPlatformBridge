@@ -136,8 +136,6 @@ public final class MSimpleSpeechClient {
                 // Client-ID + Endpoint senden
                 writer.println(clientId);
                 writer.println(endpoint);
-                // poll senden für serverseitig angeschlossenen microfon button
-                if(recordTriggerLocationMode == SERVERSIDE_CONNECTED_RECORDBUTTON) writer.println("poll");
 
                 // Erste Zeile = neuer Endpoint
                 recordEndpoint = reader.readLine();
