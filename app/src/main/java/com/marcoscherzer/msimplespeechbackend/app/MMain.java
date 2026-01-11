@@ -15,6 +15,7 @@ import com.marcoscherzer.msimplespeechbackend.server.MISpeechRecognitionManager;
 import com.marcoscherzer.msimplespeechbackend.server.MIntentBasedSpeechRecognitionManager;
 import com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechBackendServer;
 import com.marcoscherzer.msimplespeechbackend.client.MSimpleSpeechClient;
+import com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechRecognitionServer;
 import com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechServerCreator;
 
 import java.io.InputStream;
@@ -29,7 +30,7 @@ public final class MMain extends AppCompatActivity {
 
     private static MMain instance;
     private static final int REQUEST_RECORD_AUDIO = 1;
-    private MSimpleSpeechBackendServer server;
+    private MSimpleSpeechRecognitionServer server;
     private MSimpleSpeechClient client;
     private MMiniGui gui;
     private MISpeechRecognitionManager speechRecognitionManager;

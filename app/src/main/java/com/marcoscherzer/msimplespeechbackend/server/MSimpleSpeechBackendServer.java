@@ -2,18 +2,11 @@ package com.marcoscherzer.msimplespeechbackend.server;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.SocketException;
 import java.security.KeyStore;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import android.content.Context;
-
 import com.marcoscherzer.msimplespeechbackend.R;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -25,12 +18,10 @@ import javax.net.ssl.SSLServerSocketFactory;
  * @version 0.0.2 ,  raw SSL-Sockets
  * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public final class MSimpleSpeechBackendServer {
+public abstract class MSimpleSpeechBackendServer {
 
-    private final MISpeechRecognitionManager recognizer;
     private Runnable onPairHandler;
     public PrintStream out;
-
     private SSLServerSocket serverSocket;
     private final ExecutorService serverLoop = Executors.newSingleThreadExecutor();
     private volatile boolean canceled;
@@ -73,8 +64,7 @@ public final class MSimpleSpeechBackendServer {
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimpleSpeechBackendServer(int port, MISpeechRecognitionManager recognitionManager, Context context, PrintStream out) throws Exception {
-        this.recognizer = recognitionManager;
+    public MSimpleSpeechBackendServer(int port, Context context, PrintStream out) throws Exception {
         this.out = out;
         out.println("Initializing server...");
         SSLContext sslContext = createSSLContext(context);
@@ -123,97 +113,6 @@ public final class MSimpleSpeechBackendServer {
             }
         });
         out.println("Server started.\nWaiting for client to pair...");
-    }
-
-    /**
-     * @version 0.0.2 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    private enum RECORD_TRIGGER_LOCATION_MODE{
-        RECORD_ONLY_ON_SERVERSIDE_EVENT,  //z.B headsetbutton
-        RECORD_ALWAYS_ON_REQUEST; //z.B client-side softwarebutton
-    }
-
-    private RECORD_TRIGGER_LOCATION_MODE mode = RECORD_TRIGGER_LOCATION_MODE.RECORD_ALWAYS_ON_REQUEST;
-
-    private CompletableFuture<Void> recordEventTrigger;
-
-    private volatile boolean hasEvent = false;
-
-    /**
-     * @version 0.0.2 ,  raw SSL-Sockets
-     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     * true   RECORD_ONLY_ON_SERVERSIDE_EVENT,  z.B headsetbutton
-     * false  RECORD_ALWAYS_ON_REQUEST,  z.B client-side softwarebutton
-     * default true RECORD_ALWAYS_ON_REQUEST,  z.B client-side softwarebutton
-     */
-    public final void setRecordTriggerToServerSide(boolean setRecordTriggerToServerSide){
-        mode = setRecordTriggerToServerSide ? RECORD_TRIGGER_LOCATION_MODE.RECORD_ONLY_ON_SERVERSIDE_EVENT : RECORD_TRIGGER_LOCATION_MODE.RECORD_ALWAYS_ON_REQUEST;
-    }
-
-
-    /**
-     * @version 0.0.2 ,  raw SSL-Sockets
-     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public final void startRecordEventAndSendResultToClient() throws UnsupportedOperationException{
-        System.out.println("startRecordEventAndSendResultToClient()");//dbg
-        if( mode == RECORD_TRIGGER_LOCATION_MODE.RECORD_ONLY_ON_SERVERSIDE_EVENT) {
-            System.out.println("(mode == RECORD_TRIGGER_LOCATION_MODE.RECORD_ONLY_ON_SERVERSIDE_EVENT)");//dbg
-            hasEvent = true;
-            if (recordEventTrigger != null) {
-                recordEventTrigger.complete(null);
-            }
-        } else throw new UnsupportedOperationException("Error: Calling startRecordEventAndSendResultToClient() is only supported for mode RECORD_ONLY_ON_SERVERSIDE_EVENT. Use setRecordTriggerToServerSideRecordTrigger(..) to change mode.");
-    }
-
-    /**
-     * @version 0.0.2 ,  raw SSL-Sockets
-     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
-     */
-    public final void handlePayload(Socket socket, PrintWriter writer) throws SocketException, ExecutionException, InterruptedException {
-        //Speech Recognition
-        String results;
-        clientInformation.nextEndpoint = UUID.randomUUID().toString();
-        writer.println(clientInformation.nextEndpoint);
-        switch (mode) {
-            case RECORD_ONLY_ON_SERVERSIDE_EVENT:
-
-                // Wenn ein Event gespeichert ist sofort starten
-                if (hasEvent) {
-                    System.out.println("working of recordEvent triggered during reconnection");
-                    hasEvent = false;//Event verbrauchen
-                    out.println("recordEvent (queued)");
-                    recognizer.startListening();
-                    results = recognizer.waitOnResults();
-                    writer.println(results);
-                    break;
-                }
-
-                System.out.println("polling and waiting for recordEvent");
-                recordEventTrigger = new CompletableFuture<Void>();
-                socket.setSoTimeout(30000);
-                try {
-                    recordEventTrigger.get(25000, TimeUnit.MILLISECONDS);
-                    hasEvent=false;
-                    System.out.println("recordEvent");
-                    out.println("Starting recognizer...");
-                    recognizer.startListening();
-                    results = recognizer.waitOnResults();
-                    out.println("Recognition complete.");
-                    writer.println(results);
-                } catch (TimeoutException exc) {
-                    System.out.println("Timeout: kein recordEvent, just polling new ");//
-                    writer.println("");
-                }
-                break;
-            case RECORD_ALWAYS_ON_REQUEST:
-                out.println("Starting recognizer...");
-                recognizer.startListening();
-                results = recognizer.waitOnResults();
-                out.println("Recognition complete.");
-                writer.println(results);
-                break;
-        }
     }
 
     /**
@@ -272,9 +171,10 @@ public final class MSimpleSpeechBackendServer {
                 }
                 if (isPaired()) { //!clientInformation.nextRecordEndpoint.equals(INITIALIZE_UUID);
                     if (clientInformation.nextEndpoint.equals(requestEndpoint)) {
-
+                        clientInformation.nextEndpoint = UUID.randomUUID().toString();
+                        writer.println(clientInformation.nextEndpoint);
 //---------------------------------------------- Payload Creation (pairing protocol independent) ------------------------------------
-                     handlePayload(socket, writer);
+                        handlePayload(socket, writer);
 //---------------------------------------------- End of Payload creation (pairing protocol independent) ------------------------------------
 
                     } else {
@@ -291,6 +191,13 @@ public final class MSimpleSpeechBackendServer {
                 try {socket.close();} catch (IOException exc) {}
             }
     }
+
+    /**
+     * @version 0.0.2 ,  raw SSL-Sockets
+     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public abstract void handlePayload(Socket socket, PrintWriter writer) throws Exception;
+
     /**
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -318,6 +225,7 @@ public final class MSimpleSpeechBackendServer {
     public final void setOnPair(Runnable handler) {
         this.onPairHandler = handler;
     }
+
 
 }
 
