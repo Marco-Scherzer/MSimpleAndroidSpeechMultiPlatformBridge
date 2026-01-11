@@ -31,7 +31,7 @@
   with Android’s speech recognition can occur, even while providing speech recognition services to another device over the network.  
   This security design choice was the main reason for developing it.
 
-  My protocol complements existing base security mechanisms (e.g., HTTPS and certificate pinning)  
+  My protocol complements existing base security mechanisms (e.g., SSL-Sockets and certificate pinning)  
   by adding an extra layer of protection. It is specifically designed to ensure that 1:1‑only client‑server connections remain exactly that.
 
 ---

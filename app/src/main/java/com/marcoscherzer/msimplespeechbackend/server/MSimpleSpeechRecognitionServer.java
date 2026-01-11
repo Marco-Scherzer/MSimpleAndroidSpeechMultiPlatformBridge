@@ -40,7 +40,7 @@ public class  MSimpleSpeechRecognitionServer extends MSimplePairingProtocolServe
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public MSimpleSpeechRecognitionServer(int port, MISpeechRecognitionManager recognitionManager, Context context, PrintStream out) throws Exception {
-        super(port, context, out);
+        super(port,new MUUIDTokenCreator(), context, out);
         this.recognizer = recognitionManager;
     }
 

@@ -3,7 +3,6 @@ package com.marcoscherzer.msimplespeechbackend.server;
 import java.io.*;
 import java.net.Socket;
 import java.security.KeyStore;
-import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import android.content.Context;
@@ -42,34 +41,51 @@ Establishing a new connection after a case of unauthenticated use forces the use
 If shutdownOnPossibleSecurityRisk protocol‑mode is activated and the authenticated client cannot connect, or a client with a wrong ID or endpoint tries to connect, the server is, for security reasons, shut down immediately and has to be restarted actively by the user (e.g., by pressing a button), and the pairing with the client has to be renewed.
 ---
  */
-public abstract class MSimplePairingProtocolServer {
+public abstract class MSimplePairingProtocolServer<TokenT> {
 
-    private Runnable onPairHandler;
+    private final MITokenCreator<TokenT> tokenCreator;
     public PrintStream out;
-    private SSLServerSocket serverSocket;
+    private final SSLServerSocket serverSocket;
     private final ExecutorService serverLoop = Executors.newSingleThreadExecutor();
     private volatile boolean canceled;
     private boolean shutdownOnPossibleSecurityRisk = false;
+
+    private Runnable onPairHandler;
+    private Runnable onInvalidRequestEndpoint;
+    private Runnable onUnknownClient;
+    private Runnable onUnknownOrExpiredEndpoint;
 
     /**
      * @version 0.0.1
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public static final class MClientInformation {
+        public int currentTokenLength;
+        private String nextEndpoint;
+        private String ip;
+        private String registeredClientId;
+
         /**
          * @version 0.0.1
          * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
          */
         MClientInformation(String nextEndpoint, String ip, String registeredClientId) {
-            this.nextEndpoint = nextEndpoint;
+            setNextEndpoint(nextEndpoint);
             this.ip = ip;
             this.registeredClientId = registeredClientId;
         }
-
-        private String nextEndpoint;
-        private String ip;
-        private String registeredClientId;
-
+        /**
+         * @version 0.0.2
+         * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         */
+        public void setNextEndpoint(String nextEndpoint) {
+            this.nextEndpoint = nextEndpoint;
+            this.currentTokenLength = nextEndpoint.length();
+        }
+        /**
+         * @version 0.0.2
+         * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+         */
         @Override
         public final String toString() {
             return "MClientInformation{" +
@@ -81,16 +97,15 @@ public abstract class MSimplePairingProtocolServer {
     }
 
     private MClientInformation clientInformation;
-    private static final String UUID_REGEX = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$";
-    private static final int UUID_REGEX_LENGTH = 32 + 4;
-    private static final String INITIALIZE_UUID = "8f3c2b4e-7c1a-4d8a-9e3e-2b0f6a9d4c12";//um extrastring prüfung für "init" zu sparen
+
 
     /**
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
-    public MSimplePairingProtocolServer(int port, Context context, PrintStream out) throws Exception {
+    public MSimplePairingProtocolServer(int port, MITokenCreator<TokenT> tokenCreator, Context context, PrintStream out) throws Exception {
         this.out = out;
+        this.tokenCreator = tokenCreator;
         out.println("Initializing server...");
         SSLContext sslContext = createSSLContext(context);
         SSLServerSocketFactory factory = sslContext.getServerSocketFactory();
@@ -123,6 +138,7 @@ public abstract class MSimplePairingProtocolServer {
      */
     public final void start(boolean shutdownOnPossibleSecurityRisk) {
         out.println("Starting server...");
+        this.shutdownOnPossibleSecurityRisk = shutdownOnPossibleSecurityRisk;
         clientInformation = new MClientInformation("initialize", null, null);
         serverLoop.submit(() -> {
             while (!canceled) {
@@ -154,36 +170,38 @@ public abstract class MSimplePairingProtocolServer {
                 writer = new PrintWriter(socket.getOutputStream(), true);
 
                 // Erste Zeile: Client-ID
-                String incomingClientId = reader.readLine(UUID_REGEX_LENGTH);
+                String incomingClientId = reader.readLine(clientInformation.currentTokenLength);
                 if (incomingClientId != null) incomingClientId = incomingClientId.trim();
                 out.println("Incoming clientId: " + incomingClientId);
 
-                if (incomingClientId == null || !incomingClientId.matches(UUID_REGEX)) {
+                if (incomingClientId == null || !incomingClientId.matches(tokenCreator.getValidationPattern())) {
                     writer.println("error");
                     writer.println("Invalid client ID");
                     return;
                 }
 
                 // Zweite Zeile: Endpoint Request
-                String requestEndpoint = reader.readLine(UUID_REGEX_LENGTH);
+                String requestEndpoint = reader.readLine(clientInformation.currentTokenLength);
                 if (requestEndpoint != null) requestEndpoint = requestEndpoint.trim();
                 out.println("Request endpoint: " + requestEndpoint);
 
-                if (requestEndpoint == null || !requestEndpoint.matches(UUID_REGEX)) {
+                if (requestEndpoint == null || !requestEndpoint.matches(tokenCreator.getValidationPattern())) {
                     writer.println("error");
                     writer.println("Invalid requestEndpoint");
+                    if(shutdownOnPossibleSecurityRisk) stop();
+                    onInvalidRequestEndpoint.run();
                     return;
                 }
 
                 // Registrierung ( z.B. connect Button )
-                if (requestEndpoint.equals(INITIALIZE_UUID) && clientInformation.registeredClientId == null) {
+                if (requestEndpoint.equals(tokenCreator.getInitialToken()) && clientInformation.registeredClientId == null) {
                     clientInformation.registeredClientId = incomingClientId;
                     clientInformation.ip = socket.getInetAddress().getHostAddress();
                     out.println("Registered new client ID = \"" + incomingClientId + "\"");
 
                     if (onPairHandler != null) { onPairHandler.run();}
 
-                    clientInformation.nextEndpoint = UUID.randomUUID().toString();
+                    clientInformation.setNextEndpoint(tokenCreator.createNewToken().toString());
 
                     writer.println(clientInformation.nextEndpoint);
                     writer.println("Paired successfully");
@@ -193,11 +211,12 @@ public abstract class MSimplePairingProtocolServer {
                     writer.println("error");
                     writer.println("Unknown client");
                     if(shutdownOnPossibleSecurityRisk) stop();
+                    onUnknownClient.run();
                     return;
                 }
                 if (isPaired()) { //!clientInformation.nextRecordEndpoint.equals(INITIALIZE_UUID);
                     if (clientInformation.nextEndpoint.equals(requestEndpoint)) {
-                        clientInformation.nextEndpoint = UUID.randomUUID().toString();
+                        clientInformation.setNextEndpoint(tokenCreator.createNewToken().toString());
                         writer.println(clientInformation.nextEndpoint);
 //---------------------------------------------- Payload Creation (pairing protocol independent) ------------------------------------
                         handlePayload(socket, writer);
@@ -207,6 +226,7 @@ public abstract class MSimplePairingProtocolServer {
                         writer.println("error");
                         writer.println("Unknown or expired endpoint");
                         if(shutdownOnPossibleSecurityRisk) stop();
+                        onUnknownOrExpiredEndpoint.run();
                     }
                 }
 
@@ -243,7 +263,7 @@ public abstract class MSimplePairingProtocolServer {
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final boolean isPaired() {
-        return !clientInformation.nextEndpoint.equals(INITIALIZE_UUID);
+        return !clientInformation.nextEndpoint.equals(tokenCreator.getInitialToken());
     }
     /**
      * @version 0.0.1
@@ -252,6 +272,29 @@ public abstract class MSimplePairingProtocolServer {
     public final void setOnPair(Runnable handler) {
         this.onPairHandler = handler;
     }
+    /**
+     * @version 0.0.2
+     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final void setOnInvalidRequestEndpoint(Runnable handler) {
+        this.onInvalidRequestEndpoint = handler;
+    }
+    /**
+     * @version 0.0.2
+     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final void setOnUnknownClient(Runnable handler) {
+        this.onUnknownClient = handler;
+    }
+
+    /**
+     * @version 0.0.2
+     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final void setOnUnknownOrExpiredEndpoint(Runnable handler) {
+        this.onUnknownOrExpiredEndpoint = handler;
+    }
+
 
 
 }
