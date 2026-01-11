@@ -135,12 +135,18 @@ public final class MSimpleSpeechBackendServer {
 
     private CompletableFuture<Void> recordEventTrigger;
 
+    private volatile boolean hasEvent = false;
+
+
     /**
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
      */
     public final void startRecordEvent(){
-        recordEventTrigger.complete(null);
+        hasEvent = true;
+        if (recordEventTrigger != null) {
+            recordEventTrigger.complete(null);
+        }
     }
 
     /**
@@ -208,10 +214,21 @@ public final class MSimpleSpeechBackendServer {
                                 System.out.println("polling and waiting for recordEvent");
                                 switch (mode) {
                                     case RECORD_ONLY_ON_SERVERSIDE_EVENT:
+                                        // Wenn ein Event gespeichert ist sofort starten
+                                        if (hasEvent) {
+                                            hasEvent = false;//Event verbrauchen
+                                            out.println("recordEvent (queued)");
+                                            recognizer.startListening();
+                                            results = recognizer.waitOnResults();
+                                            writer.println(results);
+                                            break;
+                                        }
+
                                         recordEventTrigger = new CompletableFuture<Void>();
                                         socket.setSoTimeout(30000);
                                         try {
                                             recordEventTrigger.get(25000, TimeUnit.MILLISECONDS);
+                                            hasEvent=false;
                                             System.out.println("recordEvent");
                                             out.println("Starting recognizer...");
                                             recognizer.startListening();
