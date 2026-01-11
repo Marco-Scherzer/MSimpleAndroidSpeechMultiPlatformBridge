@@ -26,7 +26,7 @@
 - **Test GUI: Server plus client for testing**
 
 - **Works with my own custom network device pairing protocol**  
-  MSimpleAndroidSpeechMultiPlatformBridge is the example implementation of my custom pairing protocol.  
+  MSimpleAndroidSpeechMultiPlatformBridge is the example implementation of my custom pairing protocol using MSimplePairingProtocolServer.  
   In case of MSimpleAndroidSpeechMultiPlatformBridge, using my protocol ensures that no parallel interaction  
   with Android’s speech recognition can occur, even while providing speech recognition services to another device over the network.  
   This security design choice was the main reason for developing it.
@@ -40,26 +40,26 @@
 
 ### Handshake
 - **Step 0:** The user has to start the pairing handshake process on the server (e.g., by pressing a button)
-- **Step 1:** The client registers with ID at the server.
-- **Step 2:** The server answers with a one time usable endpoint(a String token) for the next request.
+- **Step 1:** The client registers with it's token ID at the server.
+- **Step 2:** The server answers with a one time usable endpoint-token for the next request.
 
 
 ### Content Transmission
-- **Step 1:** The client requests the next content by using this one-time usable endpoint(a String token).
-- **Step 2:** The server sends the content plus the next one‑time usable endpoint … and so on (1,2, 1,2, …)
+- **Step 3:** The client requests the next content by using the one-time usable endpoint-token.
+- **Step 4:** The server sends the content plus the next one‑time usable endpoint-token … and so on (3,4, 3,4, …)
 
 
 
-**Features:**
-1. Once a client was connected for the first time, the server blocks any other (unknown) client that has another ID.
+**Security Features:**
+1. Once a client was connected for the first time, the server blocks any other (unknown) client that has another ID pr tries to connect to the paired server.
 
-2. One‑time usable endpoints make it impossible to reuse the current prepared endpoint.  
+2. The One‑time usable endpoints(tokens) make it impossible to reuse the current prepared endpoint-token.  
 If an unauthenticated client steals the ID and uses the current endpoint-token, the authenticated client cannot use the endpoint anymore and so cannot connect.
 This indicates unauthenticated use (and can optionally trigger an alarm on the client-side as well as on the server-side).
 Establishing a new connection after a case of unauthenticated use forces the user to actively restart the pairing (handshake) process on the server (e.g., by pressing a button) to reconnect and so to prevent unauthorized access.
 
 3. Protocol-Mode shutdownOnPossibleSecurityRisk:  
-If shutdownOnPossibleSecurityRisk protocol-mode is activated and the authenticated client cannot connect, or a client with a wrong ID or endpoint tried to connect, the server is for security reasons shut down immediately and has to be restarted actively by the user (e.g., by pressing a button) and the pairing with the client has to be renewed.
+   If shutdownOnPossibleSecurityRisk protocol‑mode is activated and the authenticated client cannot connect, or a client with a wrong ID or endpoint tries to connect, the server is, for security reasons, shut down immediately and has to be restarted actively by the user (e.g., by pressing a button), and the pairing with the client has to be renewed.
 ---
 
 
