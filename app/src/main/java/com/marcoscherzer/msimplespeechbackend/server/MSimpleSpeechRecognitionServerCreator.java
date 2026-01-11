@@ -8,7 +8,7 @@ import com.marcoscherzer.msimplespeechbackend.util.gui.MSimpleConsole2TextAreaRe
 /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-public class MSimpleSpeechServerCreator {
+public class MSimpleSpeechRecognitionServerCreator {
 
     private MSimpleSpeechRecognitionServer server;
     private MServerPanel gui;
@@ -16,7 +16,7 @@ public class MSimpleSpeechServerCreator {
     /**
  * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
  */
-    public MSimpleSpeechServerCreator(MServerPanel gui){
+    public MSimpleSpeechRecognitionServerCreator(MServerPanel gui){
         this.gui = gui;
     }
 
@@ -28,7 +28,7 @@ public class MSimpleSpeechServerCreator {
         try {
             gui.getResetButton().startClickAnimation("Waiting for Client...");
             if (server != null) server.stop();
-            server = new MSimpleSpeechRecognitionServer(8443, recognitionManager, gui.getLayout().getContext(), System.out);
+            server = new MSimpleSpeechRecognitionServer(8443, recognitionManager, gui.getLayout().getContext(), new MSimpleConsole2TextAreaRedirector(gui.getLogArea()));
             server.setRecordTriggerToServerSide(setRecordTriggerToServerSide);
             server.setOnPair(new Runnable() {
                 @Override

@@ -16,7 +16,7 @@ import com.marcoscherzer.msimplespeechbackend.server.MIntentBasedSpeechRecogniti
 import com.marcoscherzer.msimplespeechbackend.server.MSimplePairingProtocolServer;
 import com.marcoscherzer.msimplespeechbackend.client.MSimpleSpeechClient;
 import com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechRecognitionServer;
-import com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechServerCreator;
+import com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechRecognitionServerCreator;
 
 import java.io.InputStream;
 import java.security.cert.Certificate;
@@ -35,7 +35,7 @@ public final class MMain extends AppCompatActivity {
     private MMiniGui gui;
     private MISpeechRecognitionManager speechRecognitionManager;
     MSimpleSpeechClientCreator clientCreator;
-    MSimpleSpeechServerCreator serverCreator;
+    MSimpleSpeechRecognitionServerCreator serverCreator;
     private Certificate ca;
     private final boolean setRecordTriggerToServerSide = false;
 
@@ -70,7 +70,7 @@ public final class MMain extends AppCompatActivity {
                }
            };
 
-           serverCreator = new MSimpleSpeechServerCreator(gui.getServerPanel());
+           serverCreator = new MSimpleSpeechRecognitionServerCreator(gui.getServerPanel());
 
            if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO);
