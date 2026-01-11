@@ -51,7 +51,7 @@
 
 
 **Security Features:**
-1. Once a client was connected for the first time, the server blocks any other (unknown) client that has another ID pr tries to connect to the paired server.
+1. Once a client was connected for the first time, the server blocks any other (unknown) client that has another ID and tries to connect to the paired server.
 
 2. The One‑time usable endpoints(tokens) make it impossible to reuse the current prepared endpoint-token.  
 If an unauthenticated client steals the ID and uses the current endpoint-token, the authenticated client cannot use the endpoint anymore and so cannot connect.
