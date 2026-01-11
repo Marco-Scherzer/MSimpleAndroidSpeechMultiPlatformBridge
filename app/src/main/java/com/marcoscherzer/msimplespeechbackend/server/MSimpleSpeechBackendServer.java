@@ -136,6 +136,16 @@ public final class MSimpleSpeechBackendServer {
 
     private RECORD_TRIGGER_LOCATION_MODE mode;
 
+    private CompletableFuture<Void> recordEventTrigger;
+
+    /**
+     * @version 0.0.2 ,  raw SSL-Sockets
+     * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public final void startRecordEvent(){
+        recordEventTrigger.complete(null);
+    }
+
     /**
      * @version 0.0.2 ,  raw SSL-Sockets
      * unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
@@ -195,15 +205,15 @@ public final class MSimpleSpeechBackendServer {
                 // Speech Recognition ( server side record Button )
                 if(mode == SERVERSIDE_CONNECTED_RECORDBUTTON)
                 if (clientInformation.nextRecordEndpoint.equals(requestEndpoint)) {
-                    String results = "";
+                    String results;
                     clientInformation.nextRecordEndpoint = UUID.randomUUID().toString();
                     writer.println(clientInformation.nextRecordEndpoint);
                     if (isPaired()) {
-                            CompletableFuture<Void> recordEvent = new CompletableFuture<Void>();
+                            recordEventTrigger = new CompletableFuture<Void>();
                             socket.setSoTimeout(30000);
                             try {
                                 System.out.println("polling and waiting for recordEvent");
-                                recordEvent.get(25000, TimeUnit.MILLISECONDS);
+                                recordEventTrigger.get(25000, TimeUnit.MILLISECONDS);
                                 System.out.println("recordEvent");
                                 out.println("Starting recognizer...");
                                 recognizer.startListening();
