@@ -159,7 +159,7 @@ public final class MSimpleSpeechBackendServer {
             if (recordEventTrigger != null) {
                 recordEventTrigger.complete(null);
             }
-        } else throw new UnsupportedOperationException("Error: Calling startRecordEvent() is only supported for mode RECORD_ONLY_ON_SERVERSIDE_EVENT. Use setMode(..) to change mode.");
+        } else throw new UnsupportedOperationException("Error: Calling startRecordEventAndSendResultToClient() is only supported for mode RECORD_ONLY_ON_SERVERSIDE_EVENT. Use setRecordTriggerToServerSideRecordTrigger(..) to change mode.");
     }
 
     /**
