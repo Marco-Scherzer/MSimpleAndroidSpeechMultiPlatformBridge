@@ -1,5 +1,8 @@
 package com.marcoscherzer.msimplespeechbackend.server;
 
+import static com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechBackendServer.RECORD_TRIGGER_LOCATION_MODE.CLIENTSIDE_CONNECTED_RECORDBUTTON;
+import static com.marcoscherzer.msimplespeechbackend.server.MSimpleSpeechBackendServer.RECORD_TRIGGER_LOCATION_MODE.SERVERSIDE_CONNECTED_RECORDBUTTON;
+
 import java.io.*;
 import java.net.Socket;
 import java.security.KeyStore;
@@ -123,6 +126,15 @@ public final class MSimpleSpeechBackendServer {
         out.println("Server started.\nWaiting for client to pair...");
     }
 
+    /**
+     * @version 0.0.1 ,  unready intermediate state, @author Marco Scherzer, Author, Ideas, APIs, Nomenclatures & Architectures Marco Scherzer, Copyright Marco Scherzer, All rights reserved
+     */
+    public static enum RECORD_TRIGGER_LOCATION_MODE{
+        SERVERSIDE_CONNECTED_RECORDBUTTON,  //z.B headsetbutton
+        CLIENTSIDE_CONNECTED_RECORDBUTTON; //z.B client-side softwarebutton
+    }
+
+    private RECORD_TRIGGER_LOCATION_MODE mode;
 
     /**
      * @version 0.0.2 ,  raw SSL-Sockets
@@ -181,6 +193,7 @@ public final class MSimpleSpeechBackendServer {
                 }
 
                 // Speech Recognition ( server side record Button )
+                if(mode == SERVERSIDE_CONNECTED_RECORDBUTTON)
                 if (clientInformation.nextRecordEndpoint.equals(requestEndpoint)) {
                     String results = "";
                     clientInformation.nextRecordEndpoint = UUID.randomUUID().toString();
@@ -198,7 +211,7 @@ public final class MSimpleSpeechBackendServer {
                                 out.println("Recognition complete.");
                                 writer.println(results);
                             } catch (TimeoutException exc) {
-                                System.out.println("Timeout: kein recordEvent, polling new ");//
+                                System.out.println("Timeout: kein recordEvent, just polling new ");//
                                 writer.println("");
                             }
                     }
@@ -209,6 +222,7 @@ public final class MSimpleSpeechBackendServer {
 
 
                 // Speech Recognition ( client side record Button )
+                if(mode == CLIENTSIDE_CONNECTED_RECORDBUTTON)
                 if (clientInformation.nextRecordEndpoint.equals(requestEndpoint)) {
                     String results = "";
                     if (isPaired()) {
